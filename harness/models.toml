@@ -1,0 +1,44 @@
+# Provider and model configuration for the prompt-optimization harness.
+# Every run freezes a copy of this file into its inputs; edit here, not in Python.
+
+[hosts]
+ollama = "http://127.0.0.1:11434"
+openrouter = "https://openrouter.ai"
+
+[local]
+# Ollama tags screened by preflight. Each installed tag yields thinking-off and thinking-on
+# conditions ("<tag>/off", "<tag>/on") when the model reports the thinking capability.
+tags = [
+  "qwen3.8:27b",
+  "granite4.2:30b",
+  "gemma4:31b",
+  "muse-glimmer:latest",
+  "nemotron-3.5-lightning:30b",
+]
+
+[hosted]
+# OpenRouter model IDs and the pinned endpoint tag for each. Endpoints must support
+# response_format, structured_outputs and reasoning; a run refuses an endpoint whose
+# tariff rises above the frozen price unless the increase is accepted explicitly.
+models = ["deepseek/deepseek-v4-pro", "z-ai/glm-5.3", "anthropic/claude-opus-5"]
+
+[hosted.endpoints]
+"deepseek/deepseek-v4-pro" = "streamlake/fp8"
+"z-ai/glm-5.3" = "reka/fp8"
+"anthropic/claude-opus-5" = "anthropic"
+
+[calibration]
+# Local conditions screened by the calibration gate and the hosted decidability reference.
+conditions = [
+  "qwen3.8:27b/off",
+  "qwen3.8:27b/on",
+  "gemma4:31b/off",
+  "gemma4:31b/on",
+  "muse-glimmer:latest/on",
+  "granite4.2:30b/off",
+]
+reference = "deepseek/deepseek-v4-pro"
+
+[ablation]
+# Executors for the fixed scaffolding controls; must equal the gate-promoted pair.
+executors = ["qwen3.8:27b/off", "granite4.2:30b/off"]

@@ -1,0 +1,36 @@
+{
+  "source_run": "extension-continuation6-20260916T214036169830Z",
+  "manifest_sha256": "6cbe0ab655aaa86ae2d41b40afb8dd4d237cf07841d88060a5453e4cde9ae674",
+  "copied": {
+    "trajectories": 9,
+    "decisions": 72,
+    "disclosures": 144,
+    "evaluations": 8832,
+    "selections": 10,
+    "sealed-panels": 24,
+    "reports": 2,
+    "generations": 128,
+    "reconciliations": 1,
+    "hosted-key-usage": 10,
+    "candidate-failures": 16
+  },
+  "resources": {
+    "committed_results": 8976,
+    "local_attempts": 8832,
+    "hosted_attempts": 211,
+    "hosted_attempts_without_reported_cost": 11,
+    "hosted_reported_cost_usd": 1.130431,
+    "running_seconds_this_directory": 1896.571
+  },
+  "excluded": [
+    "work/",
+    "checks/",
+    "telemetry/*/samples.jsonl",
+    "runtime/",
+    "sessions/",
+    "progress/",
+    "logical-keys/",
+    "operator*"
+  ],
+  "note": "prospectively planned extension: further paired repetitions with the same schedule generator, analysed beside the original campaign"
+}

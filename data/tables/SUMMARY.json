@@ -1,0 +1,149 @@
+{
+  "tables": [
+    "table_budget.md",
+    "table_calibration.md",
+    "table_ceiling.md",
+    "table_chronology.md",
+    "table_cost_and_time.md",
+    "table_optimizer_portability.md",
+    "table_partitions.md",
+    "table_primary_contrast.md",
+    "table_scaffolding_ablation.md",
+    "table_tier_means.md",
+    "table_trajectories.md"
+  ],
+  "figures": [
+    "fig_study_design.png",
+    "fig_study_design.pdf",
+    "fig_paired_deltas.png",
+    "fig_paired_deltas.pdf",
+    "fig_ceiling_ladder.png",
+    "fig_disclosure_volume.png",
+    "fig_search_dynamics.png",
+    "fig_search_dynamics.pdf",
+    "fig_precision_recall.png",
+    "fig_precision_recall.pdf",
+    "fig_strata_heatmap.png",
+    "fig_strata_heatmap.pdf",
+    "fig_calibration_history.png"
+  ],
+  "primary_contrast": {
+    "granite4.2:30b/off T2 \u2212 T3 original": {
+      "repetitions": 5,
+      "mean": -0.045784364368558504,
+      "sd": 0.03652666625520118,
+      "ci95_bootstrap": [
+        -0.0746918072040041,
+        -0.020058833806829747
+      ],
+      "ci95_paired_t": [
+        -0.09113093993993913,
+        -0.0004377887971778738
+      ]
+    },
+    "granite4.2:30b/off T1 \u2212 T2 original": {
+      "repetitions": 5,
+      "mean": 0.03657111799094411,
+      "sd": 0.032552253744599156,
+      "ci95_bootstrap": [
+        0.01008351273140099,
+        0.05873815846636595
+      ],
+      "ci95_paired_t": [
+        -0.003841363787023544,
+        0.07698359976891177
+      ]
+    },
+    "granite4.2:30b/off T1 \u2212 T3 original": {
+      "repetitions": 5,
+      "mean": -0.009213246377614392,
+      "sd": 0.02901278533426601,
+      "ci95_bootstrap": [
+        -0.032625621898527676,
+        0.012643938132980936
+      ],
+      "ci95_paired_t": [
+        -0.045231602213994596,
+        0.02680510945876581
+      ]
+    },
+    "granite4.2:30b/off T2 \u2212 T3 all": {
+      "repetitions": 8,
+      "mean": -0.025817733528597196,
+      "sd": 0.04353869763752695,
+      "ci95_bootstrap": [
+        -0.05358571911782241,
+        0.0016442110227460546
+      ],
+      "ci95_paired_t": [
+        -0.06222277964481672,
+        0.010587312587622327
+      ]
+    },
+    "granite4.2:30b/off T1 \u2212 T2 all": {
+      "repetitions": 8,
+      "mean": 0.033636098069194036,
+      "sd": 0.04672740863829058,
+      "ci95_bootstrap": [
+        0.0010116813493842441,
+        0.061588007133399035
+      ],
+      "ci95_paired_t": [
+        -0.005435200767778439,
+        0.07270739690616651
+      ]
+    },
+    "granite4.2:30b/off T1 \u2212 T3 all": {
+      "repetitions": 8,
+      "mean": 0.00781836454059684,
+      "sd": 0.04080712272461206,
+      "ci95_bootstrap": [
+        -0.018175294576265065,
+        0.03583562075967649
+      ],
+      "ci95_paired_t": [
+        -0.02630266491755749,
+        0.04193939399875117
+      ]
+    },
+    "qwen3.8:27b/off T2 \u2212 T3 original": {
+      "repetitions": 5,
+      "mean": -0.013195855606452044,
+      "sd": 0.020743721962440682,
+      "ci95_bootstrap": [
+        -0.03215524113490631,
+        0.0
+      ],
+      "ci95_paired_t": [
+        -0.03894845917091177,
+        0.01255674795800768
+      ]
+    },
+    "qwen3.8:27b/off T1 \u2212 T2 original": {
+      "repetitions": 5,
+      "mean": 0.0004470106106196026,
+      "sd": 0.025780565550506673,
+      "ci95_bootstrap": [
+        -0.021198852806526912,
+        0.022539884638385722
+      ],
+      "ci95_paired_t": [
+        -0.031558657682268086,
+        0.03245267890350729
+      ]
+    },
+    "qwen3.8:27b/off T1 \u2212 T3 original": {
+      "repetitions": 5,
+      "mean": -0.012748844995832443,
+      "sd": 0.023401559322860643,
+      "ci95_bootstrap": [
+        -0.03431373921796688,
+        0.0
+      ],
+      "ci95_paired_t": [
+        -0.04180106046242026,
+        0.016303370470755377
+      ]
+    }
+  }
+}

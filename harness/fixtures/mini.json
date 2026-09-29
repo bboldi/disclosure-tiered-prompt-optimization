@@ -1,0 +1,96 @@
+{
+  "semantics": "synthetic-numeric-or-v1",
+  "provenance": "Hand-authored fictional engineering fixtures and expected labels; not NVD records or research evidence.",
+  "profiles": [
+    {
+      "id": "opt_in_range", "partition": "optimization",
+      "text": "CANARY_PRIVATE_PROFILE_A: Acme mixer version 1.2 is installed.",
+      "components": [{"vendor": "Acme", "product": "mixer", "version": "1.2"}],
+      "advisories": [
+        {"id": "CVE-2099-1001", "description": "Affected-component details are supplied separately.", "vendor": "Acme", "product": "mixer", "start": "1.0", "end": "2.0"},
+        {"id": "CVE-2099-1002", "description": "An unrelated sibling component issue.", "vendor": "Acme", "product": "viewer", "exact": "1.2"}
+      ],
+      "expected": ["CVE-2099-1001"]
+    },
+    {
+      "id": "opt_patched", "partition": "optimization",
+      "text": "CANARY_PRIVATE_PROFILE_B: Bravo furnace version 2.0 is installed.",
+      "components": [{"vendor": "Bravo", "product": "furnace", "version": "2.0"}],
+      "advisories": [
+        {"id": "CVE-2099-1003", "description": "A product issue; see affected bounds.", "vendor": "Bravo", "product": "furnace", "start": "1.0", "end": "2.0"},
+        {"id": "CVE-2099-1004", "description": "A controller issue.", "vendor": "Bravo", "product": "controller", "exact": "2.0"}
+      ],
+      "expected": []
+    },
+    {
+      "id": "opt_zero", "partition": "optimization",
+      "text": "CANARY_PRIVATE_PROFILE_C: Cobalt relay version 5.0 is installed.",
+      "components": [{"vendor": "Cobalt", "product": "relay", "version": "5.0"}],
+      "advisories": [
+        {"id": "CVE-2099-1005", "description": "Exact-version applicability.", "vendor": "Cobalt", "product": "relay", "exact": "5.0.0"},
+        {"id": "CVE-2099-1006", "description": "Older versions only.", "vendor": "Cobalt", "product": "relay", "end": "5.0", "end_inclusive": false}
+      ],
+      "expected": ["CVE-2099-1005"]
+    },
+    {
+      "id": "val_in_range", "partition": "validation",
+      "text": "Delta turbine version 3.2 is installed.",
+      "components": [{"vendor": "Delta", "product": "turbine", "version": "3.2"}],
+      "advisories": [
+        {"id": "CVE-2099-2001", "description": "Applicability information follows.", "vendor": "Delta", "product": "turbine", "start": "3.0", "end": "4.0"},
+        {"id": "CVE-2099-2002", "description": "Different vendor.", "vendor": "Other", "product": "turbine", "exact": "3.2"}
+      ],
+      "expected": ["CVE-2099-2001"]
+    },
+    {
+      "id": "val_patched", "partition": "validation",
+      "text": "Echo pump version 4.0 is installed.",
+      "components": [{"vendor": "Echo", "product": "pump", "version": "4.0"}],
+      "advisories": [
+        {"id": "CVE-2099-2003", "description": "Exclusive upper boundary.", "vendor": "Echo", "product": "pump", "end": "4.0"},
+        {"id": "CVE-2099-2004", "description": "An older exact version.", "vendor": "Echo", "product": "pump", "exact": "3.9"}
+      ],
+      "expected": []
+    },
+    {
+      "id": "val_zero", "partition": "validation",
+      "text": "Foxtrot gate version 6.0 is installed.",
+      "components": [{"vendor": "Foxtrot", "product": "gate", "version": "6.0"}],
+      "advisories": [
+        {"id": "CVE-2099-2005", "description": "Inclusive upper boundary.", "vendor": "Foxtrot", "product": "gate", "start": "5", "end": "6.0.0", "end_inclusive": true},
+        {"id": "CVE-2099-2006", "description": "Exclusive lower boundary.", "vendor": "Foxtrot", "product": "gate", "start": "6.0.0", "start_inclusive": false}
+      ],
+      "expected": ["CVE-2099-2005"]
+    },
+    {
+      "id": "test_in_range", "partition": "test",
+      "text": "Golf rotor version 7.2 is installed.",
+      "components": [{"vendor": "Golf", "product": "rotor", "version": "7.2"}],
+      "advisories": [
+        {"id": "CVE-2099-3001", "description": "Applicability information follows.", "vendor": "Golf", "product": "rotor", "start": "7", "end": "8"},
+        {"id": "CVE-2099-3002", "description": "Same version but other product.", "vendor": "Golf", "product": "screen", "exact": "7.2"}
+      ],
+      "expected": ["CVE-2099-3001"]
+    },
+    {
+      "id": "test_patched", "partition": "test",
+      "text": "Hotel valve version 8.0 is installed.",
+      "components": [{"vendor": "Hotel", "product": "valve", "version": "8.0"}],
+      "advisories": [
+        {"id": "CVE-2099-3003", "description": "Exclusive upper boundary.", "vendor": "Hotel", "product": "valve", "end": "8.0"},
+        {"id": "CVE-2099-3004", "description": "Different vendor.", "vendor": "Foreign", "product": "valve", "exact": "8"}
+      ],
+      "expected": []
+    },
+    {
+      "id": "test_zero", "partition": "test",
+      "text": "India motor version 9.0 is installed.",
+      "components": [{"vendor": "India", "product": "motor", "version": "9.0"}],
+      "advisories": [
+        {"id": "CVE-2099-3005", "description": "Exact numeric version.", "vendor": "India", "product": "motor", "exact": "9.0.0"},
+        {"id": "CVE-2099-3006", "description": "Older versions only.", "vendor": "India", "product": "motor", "end": "9", "end_inclusive": false}
+      ],
+      "expected": ["CVE-2099-3005"]
+    }
+  ]
+}

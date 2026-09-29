@@ -1,0 +1,30 @@
+{
+  "source_run": "calibration-20260913T103659808099Z",
+  "manifest_sha256": "254886918edcd8a34a6cae0f6cdaf3b843a24b0832584f7c3bb1c0901aee6186",
+  "copied": {
+    "evaluations": 624,
+    "conditions": 12,
+    "reports": 1,
+    "generations": 48,
+    "hosted-key-usage": 2
+  },
+  "resources": {
+    "committed_results": 624,
+    "local_attempts": 576,
+    "hosted_attempts": 48,
+    "hosted_attempts_without_reported_cost": 0,
+    "hosted_reported_cost_usd": 0.130312,
+    "running_seconds_this_directory": 11685.333
+  },
+  "excluded": [
+    "work/",
+    "checks/",
+    "telemetry/*/samples.jsonl",
+    "runtime/",
+    "sessions/",
+    "progress/",
+    "logical-keys/",
+    "operator*"
+  ],
+  "note": "calibration gate screen on pilot-development profiles"
+}

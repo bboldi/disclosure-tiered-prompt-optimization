@@ -1,0 +1,28 @@
+{
+  "source_run": "rule-baseline-20260916T134655074838Z",
+  "manifest_sha256": "aa9bfcfc9e5ff11a662545ec77d88fdf66a9471e7f1d072462c4d5b29050ccef",
+  "copied": {
+    "evaluations": 384,
+    "panels": 3,
+    "reports": 1
+  },
+  "resources": {
+    "committed_results": 0,
+    "local_attempts": 0,
+    "hosted_attempts": 0,
+    "hosted_attempts_without_reported_cost": 0,
+    "hosted_reported_cost_usd": 0.0,
+    "running_seconds_this_directory": 0.0
+  },
+  "excluded": [
+    "work/",
+    "checks/",
+    "telemetry/*/samples.jsonl",
+    "runtime/",
+    "sessions/",
+    "progress/",
+    "logical-keys/",
+    "operator*"
+  ],
+  "note": "follow-up run: rule-baseline"
+}

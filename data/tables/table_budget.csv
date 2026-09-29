@@ -1,0 +1,4 @@
+Arm,Search schedule,Proposal evaluations,Incumbent re-evaluations,Search evaluations per trajectory,Selection (validation),Sealed evaluations per selected prompt
+"Main (GLM-5.3, Tiers 1–3)",8 rounds × 2 candidates × 24 profiles,384,192,576,shortlist × 96,384
+"Reference optimizer (DeepSeek V4 Pro, Tier 2)",8 rounds × 2 candidates × 24 profiles,384,192,576,shortlist × 96,384
+GEPA (Tier 2),engine-controlled; capped by executor profile calls,—,—,600,shortlist × 96,384

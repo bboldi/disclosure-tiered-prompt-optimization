@@ -1,0 +1,9 @@
+# Complete candidate population
+
+This directory retains all 30,335 eligible NVD candidates before CNA admission or model-based selection. It is not a generated profile benchmark. The 2023/2024/2025 feed candidate counts are 10,165 / 10,248 / 9,922 after the original five-CVE quarantine. Source snapshots and their checksums are retained under `../benchmark-20260912-01/sources/`; the original review is `../benchmark-20260912-01/source-docs/source-review.json`.
+
+To recreate the logical candidate population, iterate the three annual feeds in year order and each feed's `vulnerabilities` array in its saved order. For each `entry['cve']`, exclude the original review's five identifiers, call `promptbench.benchmark.oracle.parse_advisory`, and retain only publication years 2023–2025 using `benchmark.build.publication_year`. Unsupported/malformed predicates remain exclusions. Serialize each resulting `PublicAdvisory.record()` using `benchmark.build.write_jsonl`, which writes canonical JSON with physical newlines. The resulting CVE set must equal all keys in `../benchmark-20260912-02/partitions.json`.
+
+Do not use Python `str.splitlines()` to read JSONL: a public description contains a Unicode separator that is valid inside a JSON string. `promptbench.storage.read_jsonl` reads physical records safely. The regression test records this previously observed failure.
+
+For the CNA stage, `promptbench.benchmark.cna_sources` reads this candidate file and the frozen repository revision. The expanded acquisition used 16 workers through `acquire(..., workers=16)`; worker count is frozen in its plan. `promptbench.benchmark.admission` screens the complete acquired population, retaining all rejection reasons and preserving the original partition map. Textual/source review is a separate recorded step; the machine screening alone does not confer scientific admission.

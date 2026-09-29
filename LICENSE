@@ -1,0 +1,15 @@
+This repository contains two parts under two licenses.
+
+harness/  Source code, tests and configuration.
+          MIT License. See harness/LICENSE.
+
+data/     Benchmark, source recipe and the scientific records of every run.
+          Creative Commons Attribution 4.0 International (CC BY 4.0).
+          See data/LICENSE.
+
+NVD content is provided by the U.S. National Institute of Standards and
+Technology. CVE Program records are provided by the CVE Program and its CNAs
+under their terms. Model outputs in data/ are the outputs of the named models
+under their providers' terms.
+
+Copyright (c) 2026 Boldizsár Bednárik, László Gogolák, József Sárosi

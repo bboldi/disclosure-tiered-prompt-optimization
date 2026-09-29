@@ -1,0 +1,36 @@
+{
+  "source_run": "campaign-continuation3-20260915T195841504137Z",
+  "manifest_sha256": "96afc6237bde29192aa0087109e90a51353b8416229bfd1b93edc12ce2e064a1",
+  "copied": {
+    "trajectories": 36,
+    "decisions": 264,
+    "disclosures": 558,
+    "evaluations": 32568,
+    "selections": 36,
+    "sealed-panels": 66,
+    "reports": 2,
+    "generations": 552,
+    "reconciliations": 1,
+    "hosted-key-usage": 7,
+    "candidate-failures": 6
+  },
+  "resources": {
+    "committed_results": 33126,
+    "local_attempts": 32568,
+    "hosted_attempts": 622,
+    "hosted_attempts_without_reported_cost": 17,
+    "hosted_reported_cost_usd": 4.898838,
+    "running_seconds_this_directory": 13334.041
+  },
+  "excluded": [
+    "work/",
+    "checks/",
+    "telemetry/*/samples.jsonl",
+    "runtime/",
+    "sessions/",
+    "progress/",
+    "logical-keys/",
+    "operator*"
+  ],
+  "note": "final continuation holding the complete adopted journal of the Phase 3 campaign"
+}

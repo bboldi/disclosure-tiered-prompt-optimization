@@ -1,0 +1,55 @@
+**Every optimization trajectory with its selected prompt's sealed-panel scores (appendix).**
+
+| Run | Arm | Executor | Optimizer | Tier | Rep | Changed | Validation F1 | Test F1 | Test recall | Coverage | Temporal F1 | Held-out F1 | Easy/medium/hard |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| campaign | gepa | Qwen 3.8 27B | z-ai/glm-5.3 | 2 | 1 | no | 0.742 | 0.763 | 0.790 | 1.000 | 0.780 | 0.798 | 0.84/0.78/0.70 |
+| campaign | gepa | Qwen 3.8 27B | z-ai/glm-5.3 | 2 | 2 | yes | 0.769 | 0.780 | 0.799 | 1.000 | 0.750 | 0.771 | 0.86/0.78/0.73 |
+| campaign | gepa | Qwen 3.8 27B | z-ai/glm-5.3 | 2 | 3 | no | 0.742 | 0.763 | 0.790 | 1.000 | 0.780 | 0.798 | 0.84/0.78/0.70 |
+| campaign | main | Granite 4.2 30B | z-ai/glm-5.3 | 1 | 1 | yes | 0.450 | 0.407 | 0.610 | 0.969 | 0.416 | 0.350 | 0.43/0.34/0.44 |
+| campaign | main | Granite 4.2 30B | z-ai/glm-5.3 | 1 | 2 | yes | 0.428 | 0.361 | 0.348 | 0.984 | 0.317 | 0.236 | 0.43/0.31/0.34 |
+| campaign | main | Granite 4.2 30B | z-ai/glm-5.3 | 1 | 3 | yes | 0.428 | 0.385 | 0.523 | 0.979 | 0.400 | 0.310 | 0.43/0.36/0.37 |
+| campaign | main | Granite 4.2 30B | z-ai/glm-5.3 | 1 | 4 | yes | 0.448 | 0.395 | 0.689 | 0.979 | 0.387 | 0.309 | 0.46/0.32/0.41 |
+| campaign | main | Granite 4.2 30B | z-ai/glm-5.3 | 1 | 5 | yes | 0.439 | 0.418 | 0.566 | 0.969 | 0.432 | 0.365 | 0.46/0.41/0.40 |
+| campaign | main | Granite 4.2 30B | z-ai/glm-5.3 | 2 | 1 | yes | 0.415 | 0.335 | 0.412 | 0.990 | 0.380 | 0.232 | 0.40/0.32/0.29 |
+| campaign | main | Granite 4.2 30B | z-ai/glm-5.3 | 2 | 2 | yes | 0.398 | 0.309 | 0.274 | 0.984 | 0.328 | 0.176 | 0.40/0.32/0.22 |
+| campaign | main | Granite 4.2 30B | z-ai/glm-5.3 | 2 | 3 | yes | 0.416 | 0.358 | 0.439 | 0.990 | 0.345 | 0.297 | 0.48/0.38/0.25 |
+| campaign | main | Granite 4.2 30B | z-ai/glm-5.3 | 2 | 4 | yes | 0.438 | 0.409 | 0.555 | 0.995 | 0.373 | 0.297 | 0.46/0.39/0.39 |
+| campaign | main | Granite 4.2 30B | z-ai/glm-5.3 | 2 | 5 | yes | 0.434 | 0.371 | 0.701 | 0.984 | 0.380 | 0.313 | 0.43/0.31/0.38 |
+| campaign | main | Granite 4.2 30B | z-ai/glm-5.3 | 3 | 1 | yes | 0.472 | 0.384 | 0.462 | 0.964 | 0.410 | 0.332 | 0.42/0.33/0.38 |
+| campaign | main | Granite 4.2 30B | z-ai/glm-5.3 | 3 | 2 | yes | 0.434 | 0.411 | 0.474 | 0.979 | 0.317 | 0.268 | 0.42/0.39/0.42 |
+| campaign | main | Granite 4.2 30B | z-ai/glm-5.3 | 3 | 3 | yes | 0.441 | 0.374 | 0.414 | 0.969 | 0.399 | 0.349 | 0.42/0.42/0.30 |
+| campaign | main | Granite 4.2 30B | z-ai/glm-5.3 | 3 | 4 | yes | 0.458 | 0.420 | 0.495 | 0.990 | 0.333 | 0.320 | 0.50/0.40/0.37 |
+| campaign | main | Granite 4.2 30B | z-ai/glm-5.3 | 3 | 5 | yes | 0.448 | 0.423 | 0.435 | 0.974 | 0.408 | 0.253 | 0.44/0.35/0.46 |
+| campaign | main | Qwen 3.8 27B | z-ai/glm-5.3 | 1 | 1 | no | 0.742 | 0.763 | 0.790 | 1.000 | 0.780 | 0.798 | 0.84/0.78/0.70 |
+| campaign | main | Qwen 3.8 27B | z-ai/glm-5.3 | 1 | 2 | yes | 0.744 | 0.713 | 0.852 | 1.000 | 0.668 | 0.722 | 0.74/0.63/0.74 |
+| campaign | main | Qwen 3.8 27B | z-ai/glm-5.3 | 1 | 3 | no | 0.742 | 0.763 | 0.790 | 1.000 | 0.780 | 0.798 | 0.84/0.78/0.70 |
+| campaign | main | Qwen 3.8 27B | z-ai/glm-5.3 | 1 | 4 | no | 0.742 | 0.763 | 0.790 | 1.000 | 0.780 | 0.798 | 0.84/0.78/0.70 |
+| campaign | main | Qwen 3.8 27B | z-ai/glm-5.3 | 1 | 5 | no | 0.742 | 0.763 | 0.790 | 1.000 | 0.780 | 0.798 | 0.84/0.78/0.70 |
+| campaign | main | Qwen 3.8 27B | z-ai/glm-5.3 | 2 | 1 | no | 0.742 | 0.763 | 0.790 | 1.000 | 0.780 | 0.798 | 0.84/0.78/0.70 |
+| campaign | main | Qwen 3.8 27B | z-ai/glm-5.3 | 2 | 2 | yes | 0.764 | 0.748 | 0.849 | 1.000 | 0.743 | 0.741 | 0.77/0.73/0.75 |
+| campaign | main | Qwen 3.8 27B | z-ai/glm-5.3 | 2 | 3 | no | 0.742 | 0.763 | 0.790 | 1.000 | 0.780 | 0.798 | 0.84/0.78/0.70 |
+| campaign | main | Qwen 3.8 27B | z-ai/glm-5.3 | 2 | 4 | no | 0.742 | 0.763 | 0.790 | 1.000 | 0.780 | 0.798 | 0.84/0.78/0.70 |
+| campaign | main | Qwen 3.8 27B | z-ai/glm-5.3 | 2 | 5 | yes | 0.756 | 0.725 | 0.790 | 1.000 | 0.740 | 0.747 | 0.79/0.70/0.69 |
+| campaign | main | Qwen 3.8 27B | z-ai/glm-5.3 | 3 | 1 | no | 0.742 | 0.763 | 0.790 | 1.000 | 0.780 | 0.798 | 0.84/0.78/0.70 |
+| campaign | main | Qwen 3.8 27B | z-ai/glm-5.3 | 3 | 2 | yes | 0.773 | 0.767 | 0.848 | 1.000 | 0.789 | 0.771 | 0.84/0.75/0.73 |
+| campaign | main | Qwen 3.8 27B | z-ai/glm-5.3 | 3 | 3 | no | 0.742 | 0.763 | 0.790 | 1.000 | 0.780 | 0.798 | 0.84/0.78/0.70 |
+| campaign | main | Qwen 3.8 27B | z-ai/glm-5.3 | 3 | 4 | no | 0.742 | 0.763 | 0.790 | 1.000 | 0.780 | 0.798 | 0.84/0.78/0.70 |
+| campaign | main | Qwen 3.8 27B | z-ai/glm-5.3 | 3 | 5 | yes | 0.765 | 0.773 | 0.824 | 1.000 | 0.754 | 0.772 | 0.82/0.74/0.76 |
+| campaign | reference | Qwen 3.8 27B | deepseek/deepseek-v4-pro | 2 | 1 | no | 0.742 | 0.763 | 0.790 | 1.000 | 0.780 | 0.798 | 0.84/0.78/0.70 |
+| campaign | reference | Qwen 3.8 27B | deepseek/deepseek-v4-pro | 2 | 2 | no | 0.742 | 0.763 | 0.790 | 1.000 | 0.780 | 0.798 | 0.84/0.78/0.70 |
+| campaign | reference | Qwen 3.8 27B | deepseek/deepseek-v4-pro | 2 | 3 | no | 0.742 | 0.763 | 0.790 | 1.000 | 0.780 | 0.798 | 0.84/0.78/0.70 |
+| campaign-extension | main | Granite 4.2 30B | z-ai/glm-5.3 | 1 | 6 | yes | 0.492 | 0.421 | 0.628 | 0.979 | 0.429 | 0.333 | 0.47/0.34/0.45 |
+| campaign-extension | main | Granite 4.2 30B | z-ai/glm-5.3 | 1 | 7 | yes | 0.427 | 0.344 | 0.603 | 0.974 | 0.355 | 0.298 | 0.38/0.36/0.31 |
+| campaign-extension | main | Granite 4.2 30B | z-ai/glm-5.3 | 1 | 8 | yes | 0.460 | 0.431 | 0.683 | 0.984 | 0.398 | 0.321 | 0.45/0.39/0.45 |
+| campaign-extension | main | Granite 4.2 30B | z-ai/glm-5.3 | 2 | 6 | no | 0.392 | 0.335 | 0.558 | 0.938 | 0.320 | 0.311 | 0.42/0.33/0.28 |
+| campaign-extension | main | Granite 4.2 30B | z-ai/glm-5.3 | 2 | 7 | yes | 0.462 | 0.399 | 0.560 | 0.995 | 0.343 | 0.279 | 0.42/0.35/0.43 |
+| campaign-extension | main | Granite 4.2 30B | z-ai/glm-5.3 | 2 | 8 | yes | 0.422 | 0.375 | 0.351 | 0.990 | 0.417 | 0.372 | 0.47/0.34/0.31 |
+| campaign-extension | main | Granite 4.2 30B | z-ai/glm-5.3 | 3 | 6 | no | 0.392 | 0.335 | 0.558 | 0.938 | 0.320 | 0.311 | 0.42/0.33/0.28 |
+| campaign-extension | main | Granite 4.2 30B | z-ai/glm-5.3 | 3 | 7 | yes | 0.428 | 0.352 | 0.476 | 0.969 | 0.361 | 0.305 | 0.41/0.29/0.35 |
+| campaign-extension | main | Granite 4.2 30B | z-ai/glm-5.3 | 3 | 8 | yes | 0.419 | 0.400 | 0.502 | 0.984 | 0.338 | 0.280 | 0.45/0.38/0.38 |
+| opus-optimizer | main | Granite 4.2 30B | anthropic/claude-opus-5 | 2 | 1 | yes | 0.460 | 0.419 | 0.600 | 0.979 | 0.386 | 0.293 | 0.48/0.27/0.48 |
+| opus-optimizer | main | Granite 4.2 30B | anthropic/claude-opus-5 | 2 | 2 | no | 0.392 | 0.335 | 0.558 | 0.938 | 0.320 | 0.311 | 0.42/0.33/0.28 |
+| opus-optimizer | main | Granite 4.2 30B | anthropic/claude-opus-5 | 2 | 3 | yes | 0.433 | 0.344 | 0.552 | 0.943 | 0.331 | 0.333 | 0.43/0.31/0.30 |
+| opus-optimizer | main | Qwen 3.8 27B | anthropic/claude-opus-5 | 2 | 1 | yes | 0.761 | 0.749 | 0.784 | 0.995 | 0.781 | 0.797 | 0.83/0.71/0.72 |
+| opus-optimizer | main | Qwen 3.8 27B | anthropic/claude-opus-5 | 2 | 2 | no | 0.742 | 0.763 | 0.790 | 1.000 | 0.780 | 0.798 | 0.84/0.78/0.70 |
+| opus-optimizer | main | Qwen 3.8 27B | anthropic/claude-opus-5 | 2 | 3 | no | 0.742 | 0.763 | 0.790 | 1.000 | 0.780 | 0.798 | 0.84/0.78/0.70 |

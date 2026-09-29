@@ -1,0 +1,35 @@
+{
+  "source_run": "opus-optimizer-20260916T063711272344Z",
+  "manifest_sha256": "aeeeb7c69ec29f0ba45ff54cfcd22347771f3a3c8cf1f97117fa11d5216b47cc",
+  "copied": {
+    "trajectories": 6,
+    "decisions": 48,
+    "disclosures": 96,
+    "evaluations": 6048,
+    "selections": 7,
+    "sealed-panels": 15,
+    "reports": 2,
+    "generations": 96,
+    "reconciliations": 1,
+    "hosted-key-usage": 2
+  },
+  "resources": {
+    "committed_results": 6144,
+    "local_attempts": 6048,
+    "hosted_attempts": 96,
+    "hosted_attempts_without_reported_cost": 0,
+    "hosted_reported_cost_usd": 5.798015,
+    "running_seconds_this_directory": 15248.631
+  },
+  "excluded": [
+    "work/",
+    "checks/",
+    "telemetry/*/samples.jsonl",
+    "runtime/",
+    "sessions/",
+    "progress/",
+    "logical-keys/",
+    "operator*"
+  ],
+  "note": "follow-up run: opus-optimizer"
+}

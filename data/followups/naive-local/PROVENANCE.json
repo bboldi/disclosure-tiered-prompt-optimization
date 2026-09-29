@@ -1,0 +1,29 @@
+{
+  "source_run": "naive-local-20260916T120958887286Z",
+  "manifest_sha256": "7260f48358cc351ce1c48b35ea8450dc6b999b34f5f8ac6e0488a857491dd073",
+  "copied": {
+    "evaluations": 768,
+    "panels": 6,
+    "reports": 1,
+    "hosted-key-usage": 2
+  },
+  "resources": {
+    "committed_results": 768,
+    "local_attempts": 768,
+    "hosted_attempts": 0,
+    "hosted_attempts_without_reported_cost": 0,
+    "hosted_reported_cost_usd": 0.0,
+    "running_seconds_this_directory": 1479.595
+  },
+  "excluded": [
+    "work/",
+    "checks/",
+    "telemetry/*/samples.jsonl",
+    "runtime/",
+    "sessions/",
+    "progress/",
+    "logical-keys/",
+    "operator*"
+  ],
+  "note": "follow-up run: naive-local"
+}

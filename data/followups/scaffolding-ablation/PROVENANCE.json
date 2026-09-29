@@ -1,0 +1,30 @@
+{
+  "source_run": "scaffolding-20260913T145936982435Z",
+  "manifest_sha256": "86ca931f08a8ec092f547c600d7e859778d83666ecbde1d59f49416b5d782b40",
+  "copied": {
+    "evaluations": 1920,
+    "conditions": 10,
+    "reports": 1,
+    "hosted-key-usage": 2,
+    "exports": 2
+  },
+  "resources": {
+    "committed_results": 1920,
+    "local_attempts": 1920,
+    "hosted_attempts": 0,
+    "hosted_attempts_without_reported_cost": 0,
+    "hosted_reported_cost_usd": 0.0,
+    "running_seconds_this_directory": 5200.349
+  },
+  "excluded": [
+    "work/",
+    "checks/",
+    "telemetry/*/samples.jsonl",
+    "runtime/",
+    "sessions/",
+    "progress/",
+    "logical-keys/",
+    "operator*"
+  ],
+  "note": "follow-up run: scaffolding-ablation"
+}

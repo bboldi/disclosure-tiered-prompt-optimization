@@ -1,0 +1,11 @@
+**Benchmark 07 composition. Each profile pairs one synthetic inventory with a candidate advisory list; a decision is one (profile, advisory) pair. CVEs are assigned to exactly one partition and reused across that partition's profiles as anchors or distractors.**
+
+| Partition | Profiles | Profiles with ≥1 applicable CVE | Candidate decisions | Applicable decisions | Decision-level prevalence | Advisories per profile | Distinct CVEs appearing | Mean appearances per CVE | Prose-rendered fraction |
+|---|---|---|---|---|---|---|---|---|---|
+| optimization | 240 | 120 | 5581 | 729 | 0.131 | 23.3 | 132 | 42.3 | 0.07 |
+| validation | 96 | 48 | 2227 | 337 | 0.151 | 23.2 | 62 | 35.9 | 0.05 |
+| test | 192 | 96 | 4472 | 643 | 0.144 | 23.3 | 98 | 45.6 | 0.07 |
+| temporal | 96 | 48 | 2217 | 273 | 0.123 | 23.1 | 260 | 8.5 | 0.08 |
+| product_heldout | 96 | 48 | 2229 | 231 | 0.104 | 23.2 | 44 | 50.7 | 0.08 |
+| pilot_development | 72 | 36 | 1673 | 198 | 0.118 | 23.2 | 42 | 39.8 | 0.07 |
+| pilot_validation | 48 | 24 | 1084 | 106 | 0.098 | 22.6 | 23 | 47.1 | 0.10 |

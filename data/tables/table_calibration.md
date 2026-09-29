@@ -1,0 +1,11 @@
+**Calibration gate on benchmark 07, 48 pilot-development profiles, failure-aware micro-F1.**
+
+| Condition | Naive F1 | Naive recall | Expert F1 | Coverage | Nonzero T2 batches | p90 s | Gate outcome |
+|---|---|---|---|---|---|---|---|
+| gemma4:31b/off | 0.798 | 0.772 | 0.831 | 1.000 | 1.00 | 3.0 | naive_f1_outside_frozen_headroom_range |
+| gemma4:31b/on | 0.747 | 1.000 | 0.916 | 0.917 | 0.38 | 63.0 | naive_f1_outside_frozen_headroom_range; coverage_below_gate; too_few_nonzero_feedback_batches |
+| granite4.2:30b/off | 0.373 | 0.566 | 0.318 | 0.958 | 1.00 | 3.1 | promoted |
+| muse-glimmer:latest/on | 0.775 | 0.963 | 1.000 | 0.938 | 0.62 | 46.6 | naive_f1_outside_frozen_headroom_range; coverage_below_gate; too_few_nonzero_feedback_batches |
+| qwen3.8:27b/off | 0.664 | 0.654 | 0.627 | 1.000 | 1.00 | 1.6 | promoted |
+| qwen3.8:27b/on | 0.899 | 0.985 | 0.996 | 0.979 | 0.75 | 18.6 | naive_f1_outside_frozen_headroom_range; too_few_nonzero_feedback_batches |
+| DeepSeek V4 Pro (hosted reference) | 1.000 | 1.000 |  | 1.000 |  |  | decidability reference |

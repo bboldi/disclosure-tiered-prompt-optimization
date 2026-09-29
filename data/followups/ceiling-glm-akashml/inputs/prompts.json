@@ -1,0 +1,1 @@
+{"payload":{"naive":"Identify applicable supplied CVEs for the installed system. Return only {\"applicable_cves\":[\"CVE-...\"]} with unique supplied identifiers, or an empty array."},"sha256":"73420673ea0efa7bf40f31b3996fe11d17da18598ae91ebee26601366d4dcc5d"}

@@ -1,0 +1,14 @@
+{
+  "title": "Disclosure-tiered prompt optimization: code and data",
+  "upload_type": "software",
+  "description": "<p>Harness and data release for the manuscript <em>Automatic Iterative Prompt Optimization for Local LLMs: Disclosure Tiers in CVE Applicability Matching</em> (Bednárik, Gogolák, Sárosi), submitted to Computers, Materials &amp; Continua.</p><p>The <code>harness/</code> folder holds the experiment code (MIT License). The <code>data/</code> folder holds the benchmark, the source-corroboration recipe, the calibration records and the scientific records of every run (CC BY 4.0). <code>harness/scripts/make_tables.py</code> regenerates every table and figure of the paper from the released data without any model call.</p>",
+  "creators": [
+    {"name": "Bednárik, Boldizsár", "affiliation": "Óbuda University", "orcid": "0009-0005-5198-1210"},
+    {"name": "Gogolák, László", "affiliation": "University of Szeged", "orcid": "0000-0002-6653-3534"},
+    {"name": "Sárosi, József", "affiliation": "University of Szeged", "orcid": "0000-0002-6303-5011"}
+  ],
+  "license": "cc-by-4.0",
+  "access_right": "open",
+  "keywords": ["prompt optimization", "local LLM", "CVE applicability", "vulnerability management", "disclosure tiers", "benchmark"],
+  "notes": "Code in harness/ is released under the MIT License; data in data/ under CC BY 4.0. See LICENSE in the archive."
+}

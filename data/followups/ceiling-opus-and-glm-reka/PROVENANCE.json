@@ -1,0 +1,31 @@
+{
+  "source_run": "ceiling-20260916T062840690487Z",
+  "manifest_sha256": "eb66a08fd5b2ea6add2fbf2615bbe3c947696b1a4a8bb2a755613cc65aa2883b",
+  "copied": {
+    "evaluations": 518,
+    "panels": 4,
+    "generations": 517,
+    "reconciliations": 1,
+    "hosted-key-usage": 4,
+    "pauses": 4
+  },
+  "resources": {
+    "committed_results": 518,
+    "local_attempts": 0,
+    "hosted_attempts": 521,
+    "hosted_attempts_without_reported_cost": 0,
+    "hosted_reported_cost_usd": 10.014768,
+    "running_seconds_this_directory": 9252.897
+  },
+  "excluded": [
+    "work/",
+    "checks/",
+    "telemetry/*/samples.jsonl",
+    "runtime/",
+    "sessions/",
+    "progress/",
+    "logical-keys/",
+    "operator*"
+  ],
+  "note": "follow-up run: ceiling-opus-and-glm-reka"
+}

@@ -1,0 +1,20 @@
+{
+  "1": {
+    "n": 208,
+    "median_bytes": 496.0,
+    "max_bytes": 517,
+    "min_bytes": 433
+  },
+  "2": {
+    "n": 286,
+    "median_bytes": 2918.0,
+    "max_bytes": 3031,
+    "min_bytes": 2806
+  },
+  "3": {
+    "n": 208,
+    "median_bytes": 39414.5,
+    "max_bytes": 44373,
+    "min_bytes": 34657
+  }
+}

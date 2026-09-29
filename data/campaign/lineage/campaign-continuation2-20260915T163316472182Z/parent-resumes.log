@@ -1,0 +1,4 @@
+2026-09-14T15:09:12Z resume-01 after pause: metadata check deadline (transient network); resumed by Claude
+2026-09-14T15:11:06Z resume-02 auto (metadata deadline)
+2026-09-14T15:14:36Z resume-02 auto (metadata deadline)
+2026-09-14T15:30:12Z removed 4 stray CLAUDE.md files written by a shell memory plugin into directories the operator shell entered; not journal records

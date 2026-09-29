@@ -1,0 +1,31 @@
+{
+  "source_run": "ceiling-glm-akashml-20260916T091957232998Z",
+  "manifest_sha256": "49a224ef55a5cfb4c93e041f029f8515637fde52f870b4ae63a80de792b85a40",
+  "copied": {
+    "evaluations": 384,
+    "panels": 3,
+    "reports": 1,
+    "generations": 384,
+    "reconciliations": 1,
+    "hosted-key-usage": 2
+  },
+  "resources": {
+    "committed_results": 384,
+    "local_attempts": 0,
+    "hosted_attempts": 384,
+    "hosted_attempts_without_reported_cost": 0,
+    "hosted_reported_cost_usd": 1.172749,
+    "running_seconds_this_directory": 1052.936
+  },
+  "excluded": [
+    "work/",
+    "checks/",
+    "telemetry/*/samples.jsonl",
+    "runtime/",
+    "sessions/",
+    "progress/",
+    "logical-keys/",
+    "operator*"
+  ],
+  "note": "follow-up run: ceiling-glm-akashml"
+}

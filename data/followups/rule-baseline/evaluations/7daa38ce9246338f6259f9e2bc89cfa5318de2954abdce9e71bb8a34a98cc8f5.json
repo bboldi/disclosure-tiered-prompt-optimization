@@ -1,0 +1,1 @@
+{"payload":{"condition_id":"rule-baseline","key":"ceiling/rule-baseline/temporal/temporal_0047","prompt_sha256":"","row":{"categories":[],"expected":[],"fn":0,"fp":0,"partition":"temporal","prediction":[],"profile_id":"temporal_0047","status":"valid","stratum":"hard","tp":0,"valid":true}},"sha256":"23695ad20148a48593fbf26ea7ae77b0ba38a60b81691f0d71dce6dea314218c"}

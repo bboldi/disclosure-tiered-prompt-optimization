@@ -1,0 +1,1 @@
+{"payload":{"condition_id":"rule-baseline","key":"ceiling/rule-baseline/test/test_0187","prompt_sha256":"","row":{"categories":[],"expected":[],"fn":0,"fp":0,"partition":"test","prediction":[],"profile_id":"test_0187","status":"valid","stratum":"medium","tp":0,"valid":true}},"sha256":"f7f8d6911292fae1596e7800ad9741bb8506344b08955a50541cd282d99b0027"}

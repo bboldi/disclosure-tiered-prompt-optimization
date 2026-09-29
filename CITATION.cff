@@ -1,0 +1,35 @@
+cff-version: 1.2.0
+message: "If you use this code or data, please cite it as below."
+title: "Disclosure-tiered prompt optimization: code and data"
+type: software
+authors:
+  - family-names: "Bednárik"
+    given-names: "Boldizsár"
+    affiliation: "Óbuda University"
+    orcid: "https://orcid.org/0009-0005-5198-1210"
+  - family-names: "Gogolák"
+    given-names: "László"
+    affiliation: "University of Szeged"
+    orcid: "https://orcid.org/0000-0002-6653-3534"
+  - family-names: "Sárosi"
+    given-names: "József"
+    affiliation: "University of Szeged"
+    orcid: "https://orcid.org/0000-0002-6303-5011"
+repository-code: "https://github.com/bboldi/disclosure-tiered-prompt-optimization"
+license:
+  - MIT
+  - CC-BY-4.0
+version: "1.0.0"
+date-released: "2026-09-29"
+preferred-citation:
+  type: article
+  title: "Automatic Iterative Prompt Optimization for Local LLMs: Disclosure Tiers in CVE Applicability Matching"
+  authors:
+    - family-names: "Bednárik"
+      given-names: "Boldizsár"
+    - family-names: "Gogolák"
+      given-names: "László"
+    - family-names: "Sárosi"
+      given-names: "József"
+  year: 2026
+  notes: "Manuscript submitted to Computers, Materials & Continua."

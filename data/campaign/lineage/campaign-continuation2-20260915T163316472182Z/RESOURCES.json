@@ -1,0 +1,8 @@
+{
+  "committed_results": 31182,
+  "local_attempts": 30672,
+  "hosted_attempts": 570,
+  "hosted_attempts_without_reported_cost": 17,
+  "hosted_reported_cost_usd": 4.381858,
+  "running_seconds_this_directory": 12174.722
+}

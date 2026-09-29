@@ -1,0 +1,12 @@
+**Time and hosted cost per run, from the journal totals shipped with the release.**
+
+| Run | Committed results | Local calls | Hosted calls | Running hours (continuation lineage included) | Hosted cost USD (reported) | Hosted calls without reported cost |
+|---|---|---|---|---|---|---|
+| campaign | 33126 | 32568 | 622 | 34.00 | 4.90 | 17 |
+| campaign-extension | 8976 | 8832 | 211 | 8.15 | 1.13 | 11 |
+| ceiling-glm-akashml | 384 | 0 | 384 | 0.29 | 1.17 | 0 |
+| ceiling-opus-and-glm-reka | 518 | 0 | 521 | 2.57 | 10.01 | 0 |
+| naive-local | 768 | 768 | 0 | 0.41 | 0.00 | 0 |
+| opus-optimizer | 6144 | 6048 | 96 | 4.24 | 5.80 | 0 |
+| rule-baseline | 0 | 0 | 0 | 0.00 | 0.00 | 0 |
+| scaffolding-ablation | 1920 | 1920 | 0 | 1.44 | 0.00 | 0 |

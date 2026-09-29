@@ -1,0 +1,14 @@
+**Fixed-prompt scaffolding ablation on the 192 sealed test profiles, 4,096-token output cap, no optimization.**
+
+| Executor | Fixed prompt variant | F1 | Recall | Precision | Coverage | Valid-answer F1 | Mean output tokens | Δ tokens vs naive | Δ latency s |
+|---|---|---|---|---|---|---|---|---|---|
+| granite4.2:30b | off/naive | 0.349 | 0.586 | 0.249 | 0.948 | 0.393 | 78 | +0 | +0.00 |
+| granite4.2:30b | off/neutral | 0.309 | 0.462 | 0.232 | 0.932 | 0.366 | 105 | +27 | +0.70 |
+| granite4.2:30b | off/output scaffold | 0.455 | 0.748 | 0.327 | 0.906 | 0.569 | 569 | +491 | +6.73 |
+| granite4.2:30b | off/schema enum | 0.331 | 0.561 | 0.234 | 0.953 | 0.366 | 80 | +2 | -0.17 |
+| granite4.2:30b | off/structured inventory | 0.297 | 0.694 | 0.189 | 0.885 | 0.358 | 156 | +79 | +1.12 |
+| qwen3.8:27b | off/naive | 0.770 | 0.795 | 0.747 | 1.000 | 0.770 | 57 | +0 | +0.00 |
+| qwen3.8:27b | off/neutral | 0.739 | 0.796 | 0.690 | 1.000 | 0.739 | 60 | +3 | +0.42 |
+| qwen3.8:27b | off/output scaffold | 0.803 | 0.852 | 0.759 | 1.000 | 0.803 | 624 | +567 | +3.14 |
+| qwen3.8:27b | off/schema enum | 0.768 | 0.790 | 0.747 | 1.000 | 0.768 | 57 | -0 | -0.04 |
+| qwen3.8:27b | off/structured inventory | 0.769 | 0.792 | 0.747 | 1.000 | 0.769 | 56 | -1 | +0.23 |
