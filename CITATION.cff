@@ -16,6 +16,7 @@ authors:
     affiliation: "University of Szeged"
     orcid: "https://orcid.org/0000-0002-6303-5011"
 repository-code: "https://github.com/bboldi/disclosure-tiered-prompt-optimization"
+doi: "10.5281/zenodo.23044381"
 license:
   - MIT
   - CC-BY-4.0

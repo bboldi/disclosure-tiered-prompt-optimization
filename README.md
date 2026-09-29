@@ -1,5 +1,7 @@
 # Disclosure-tiered prompt optimization
 
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.23044381.svg)](https://doi.org/10.5281/zenodo.23044381)
+
 Code and data for the paper *Automatic Iterative Prompt Optimization for Local LLMs: Disclosure Tiers in CVE Applicability Matching* by Boldizsár Bednárik, László Gogolák and József Sárosi.
 
 In the study, a hosted model improves the instructions (the prompt) of a smaller model that runs on local hardware. The local model decides which supplied CVE advisories apply to a software inventory. A **disclosure tier** controls what the hosted model may learn about the local model's mistakes:
@@ -46,6 +48,10 @@ Hosted endpoints change prices and availability over time, so a rerun gives new 
 ## Citation
 
 > Bednárik, B., Gogolák, L., Sárosi, J. Automatic Iterative Prompt Optimization for Local LLMs: Disclosure Tiers in CVE Applicability Matching. 2026.
+
+The code and data themselves, as cited in the paper (release v1.0.0):
+
+> Bednárik, B., Gogolák, L., Sárosi, J. Disclosure-tiered prompt optimization: code and data. Version v1.0.0. Zenodo, 2026. https://doi.org/10.5281/zenodo.23044381
 
 ## License
 

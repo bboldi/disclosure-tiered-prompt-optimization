@@ -44,3 +44,5 @@ Creative Commons Attribution 4.0 International (CC BY 4.0). NVD content is provi
 ## Citation
 
 Bednárik, B., Gogolák, L., Sárosi, J. Automatic Iterative Prompt Optimization for Local LLMs: Disclosure Tiers in CVE Applicability Matching. 2026.
+
+This release: Bednárik, B., Gogolák, L., Sárosi, J. Disclosure-tiered prompt optimization: code and data. Version v1.0.0. Zenodo, 2026. https://doi.org/10.5281/zenodo.23044381
