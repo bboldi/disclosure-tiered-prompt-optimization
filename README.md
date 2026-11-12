@@ -1,6 +1,6 @@
 # Disclosure-tiered prompt optimization
 
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.23044381.svg)](https://doi.org/10.5281/zenodo.23044381)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.24167238.svg)](https://doi.org/10.5281/zenodo.24167238)
 
 Code and data for the paper *Disclosure-Constrained Prompt Optimization for Local LLMs: A Controlled Study on Synthetic CVE Applicability Rules* by Boldizsár Bednárik, László Gogolák and József Sárosi.
 
@@ -54,7 +54,7 @@ Hosted endpoints change prices and availability over time, so a rerun gives new 
 
 The code and data themselves, as cited in the revised paper (release v1.1.0):
 
-> Bednárik, B., Gogolák, L., Sárosi, J. Disclosure-tiered prompt optimization: code and data. Version v1.1.0. Zenodo, 2026.
+> Bednárik, B., Gogolák, L., Sárosi, J. Disclosure-tiered prompt optimization: code and data. Version v1.1.0. Zenodo, 2026. https://doi.org/10.5281/zenodo.24167238
 
 Release v1.0.0 (https://doi.org/10.5281/zenodo.23044381) is the version cited in the originally submitted paper.
 

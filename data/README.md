@@ -61,4 +61,4 @@ Creative Commons Attribution 4.0 International (CC BY 4.0). NVD content is provi
 
 Bednárik, B., Gogolák, L., Sárosi, J. Disclosure-Constrained Prompt Optimization for Local LLMs: A Controlled Study on Synthetic CVE Applicability Rules. 2026.
 
-This release: Bednárik, B., Gogolák, L., Sárosi, J. Disclosure-tiered prompt optimization: code and data. Version v1.1.0. Zenodo, 2026.
+This release: Bednárik, B., Gogolák, L., Sárosi, J. Disclosure-tiered prompt optimization: code and data. Version v1.1.0. Zenodo, 2026. https://doi.org/10.5281/zenodo.24167238
