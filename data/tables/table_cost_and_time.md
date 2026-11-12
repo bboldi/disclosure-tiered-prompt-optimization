@@ -6,7 +6,14 @@
 | campaign-extension | 8976 | 8832 | 211 | 8.15 | 1.13 | 11 |
 | ceiling-glm-akashml | 384 | 0 | 384 | 0.29 | 1.17 | 0 |
 | ceiling-opus-and-glm-reka | 518 | 0 | 521 | 2.57 | 10.01 | 0 |
+| local-self-optimization | 8296 | 8363 | 0 | 7.73 | 0.00 | 0 |
 | naive-local | 768 | 768 | 0 | 0.41 | 0.00 | 0 |
+| naive-recheck-granite | 384 | 384 | 0 | 0.21 | 0.00 | 0 |
+| naive-recheck-qwen | 384 | 384 | 0 | 0.17 | 0.00 | 0 |
 | opus-optimizer | 6144 | 6048 | 96 | 4.24 | 5.80 | 0 |
+| real-record-panel | 1488 | 1488 | 0 | 1.41 | 0.00 | 0 |
+| real-record-panel-hosted | 48 | 0 | 48 | 0.13 | 2.62 | 0 |
 | rule-baseline | 0 | 0 | 0 | 0.00 | 0.00 | 0 |
 | scaffolding-ablation | 1920 | 1920 | 0 | 1.44 | 0.00 | 0 |
+| shuffled-abstraction | 5456 | 5376 | 93 | 3.87 | 0.31 | 7 |
+| shuffled-abstraction-plain-tier2 | 5408 | 5328 | 100 | 4.09 | 0.49 | 3 |

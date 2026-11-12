@@ -1,0 +1,32 @@
+{
+  "source_run": "g34-opus-20261029T161744Z",
+  "manifest_sha256": "a5c6661d8b637091ccaf0b01fc34cfa0d08535774f04702fea05e719ddd5ecba",
+  "copied": {
+    "evaluations": 48,
+    "panels": 1,
+    "reports": 1,
+    "hosted-key-usage": 2
+  },
+  "resources": {
+    "committed_results": 48,
+    "local_attempts": 0,
+    "hosted_attempts": 48,
+    "hosted_attempts_without_reported_cost": 0,
+    "hosted_reported_cost_usd": 2.618425,
+    "running_seconds_this_directory": 453.166
+  },
+  "excluded": [
+    "work/",
+    "checks/",
+    "telemetry/*/samples.jsonl",
+    "runtime/",
+    "sessions/",
+    "progress/",
+    "logical-keys/",
+    "operator*"
+  ],
+  "note": "follow-up run: real-record-panel-hosted",
+  "derived": {
+    "work-summary.jsonl": 48
+  }
+}

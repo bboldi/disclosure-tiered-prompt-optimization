@@ -1,0 +1,32 @@
+{
+  "source_run": "verify-naive-qwen-20261028T111030Z",
+  "manifest_sha256": "140a49f66a8df942ae0552d5b9ede0f4f4dbaf12fca1dbb9e203350af368c8d5",
+  "copied": {
+    "evaluations": 384,
+    "panels": 3,
+    "reports": 1,
+    "hosted-key-usage": 2
+  },
+  "resources": {
+    "committed_results": 384,
+    "local_attempts": 384,
+    "hosted_attempts": 0,
+    "hosted_attempts_without_reported_cost": 0,
+    "hosted_reported_cost_usd": 0.0,
+    "running_seconds_this_directory": 607.695
+  },
+  "excluded": [
+    "work/",
+    "checks/",
+    "telemetry/*/samples.jsonl",
+    "runtime/",
+    "sessions/",
+    "progress/",
+    "logical-keys/",
+    "operator*"
+  ],
+  "note": "follow-up run: naive-recheck-qwen",
+  "derived": {
+    "work-summary.jsonl": 384
+  }
+}

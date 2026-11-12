@@ -1,0 +1,36 @@
+{
+  "source_run": "g39-shuffled-20261028T151548Z",
+  "manifest_sha256": "40d702d1c71db6a6dffe3cb9f4cbb921c9bd00a9917d0a3e1e633962d8567aa6",
+  "copied": {
+    "trajectories": 5,
+    "decisions": 40,
+    "disclosures": 80,
+    "evaluations": 5376,
+    "selections": 6,
+    "sealed-panels": 15,
+    "reports": 2,
+    "hosted-key-usage": 2
+  },
+  "resources": {
+    "committed_results": 5456,
+    "local_attempts": 5376,
+    "hosted_attempts": 93,
+    "hosted_attempts_without_reported_cost": 7,
+    "hosted_reported_cost_usd": 0.307234,
+    "running_seconds_this_directory": 13947.715
+  },
+  "excluded": [
+    "work/",
+    "checks/",
+    "telemetry/*/samples.jsonl",
+    "runtime/",
+    "sessions/",
+    "progress/",
+    "logical-keys/",
+    "operator*"
+  ],
+  "note": "follow-up run: shuffled-abstraction",
+  "derived": {
+    "work-summary.jsonl": 5456
+  }
+}

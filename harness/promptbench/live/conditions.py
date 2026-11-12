@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import random
 from typing import Any
 
 from ..benchmark.model import BenchmarkProfile
@@ -41,6 +42,18 @@ def local_conditions(registry: dict[str, Any]) -> list[dict[str, Any]]:
                 }
             )
     return result
+
+
+def self_optimizer_condition(executor: dict[str, Any], settings: dict[str, Any]) -> dict[str, Any]:
+    """The Executor's own model in the Optimizer role (round 1 revision): same identity, own limits."""
+    return {
+        **executor,
+        "id": executor["id"] + "/self-optimizer",
+        "think": settings["think"],
+        "num_ctx": settings["num_ctx"],
+        "num_predict": settings["num_predict"],
+        "timeout_seconds": settings["timeout_seconds"],
+    }
 
 
 def executor_request(
@@ -150,6 +163,25 @@ def hosted_conditions(
 def optimizer_request(
     condition: dict[str, Any], permitted: dict[str, Any], *, seed: int | None = None
 ) -> tuple[dict[str, Any], dict[str, Any]]:
+    if condition.get("provider") == "ollama":
+        # local Optimizer: no tariff, no reservation; sampling left at the model default, as
+        # the hosted Optimizer's was, and the repetition seed fixed in the options
+        body = {
+            "model": condition["model"],
+            "stream": False,
+            "keep_alive": "5m",
+            "truncate": False,
+            "shift": False,
+            "think": condition["think"],
+            "format": PROMPT_SCHEMA,
+            "options": {
+                **({"seed": seed} if seed is not None else {}),
+                "num_ctx": condition["num_ctx"],
+                "num_predict": condition["num_predict"],
+            },
+            "messages": [{"role": "user", "content": canonical(permitted)}],
+        }
+        return dict(condition), body
     endpoint = condition["endpoint"]
     caps = {k: str(dollars(endpoint["pricing"][k]) * 1_000_000) for k in ("prompt", "completion")}
     if seed is not None and "seed" not in endpoint.get("supported_parameters", []):
@@ -205,22 +237,43 @@ def study_feedback_request(
     *,
     tier: int,
     candidate: int,
+    variant: str | None = None,
+    shuffle_seed: int = 0,
 ) -> dict[str, Any]:
     """Main-study Optimizer view: no search label text; repetition identity is an API seed."""
     if tier not in (1, 2, 3):
         raise ValueError("invalid disclosure tier")
+    if variant not in (None, "shuffled") or (variant == "shuffled" and tier != 2):
+        raise ValueError("the shuffled feedback variant exists only for Tier 2")
     if any(p.partition != "optimization" for p in profiles) or any(
         r["partition"] != "optimization" for r in rows
     ):
         raise ValueError("Optimizer feedback may only derive from the optimization partition")
+    serialized = feedback(rows, profiles, tier)
+    if variant == "shuffled":
+        serialized["abstractions"] = shuffle_abstractions(serialized["abstractions"], shuffle_seed)
     return {
         "task": TASK,
         "current_prompt": prompt,
-        "feedback": feedback(rows, profiles, tier),
+        "feedback": serialized,
         "candidate_slot": candidate,
         "tier": tier,
-        "feedback_version": "relational-abstractions-v2",
+        "feedback_version": "relational-abstractions-v2"
+        + ("-shuffled" if variant == "shuffled" else ""),
     }
+
+
+def shuffle_abstractions(records: list[dict[str, Any]], seed: int) -> list[dict[str, Any]]:
+    """Shuffled Abstraction (round 1 revision): permute each field independently across records.
+
+    Format, record count, size and every field's multiset of values are kept, so error_counts
+    still agree; only the pairing of values within a record, the relation, is broken.
+    """
+    rng = random.Random(seed)
+    columns = {k: [r[k] for r in records] for k in (records[0] if records else {})}
+    for values in columns.values():
+        rng.shuffle(values)
+    return [{k: columns[k][i] for k in columns} for i in range(len(records))]
 
 
 def selected_profiles(

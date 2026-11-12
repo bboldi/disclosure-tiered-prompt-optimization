@@ -48,9 +48,28 @@ def sources() -> dict[str, str]:
     return {str(p.relative_to(package)): p.read_text() for p in sorted(package.rglob("*.py"))}
 
 
+def _stable_show(details: dict[str, Any]) -> dict[str, Any]:
+    """`ollama show` lists Modelfile parameters in no fixed order (observed 2026-10-28).
+
+    The identity must not flip with that order, so parameter lines are hashed sorted; every
+    other line, the template included, keeps its order and still changes the identity.
+    """
+    stable = dict(details)
+    if isinstance(details.get("parameters"), str):
+        stable["parameters"] = "\n".join(sorted(details["parameters"].splitlines()))
+    if isinstance(details.get("modelfile"), str):
+        lines = details["modelfile"].splitlines()
+        params = sorted(line for line in lines if line.startswith("PARAMETER "))
+        stable["modelfile"] = "\n".join(
+            [line for line in lines if not line.startswith("PARAMETER ")] + params
+        )
+    return stable
+
+
 def local_identity(tag: dict[str, Any], details: dict[str, Any], version: str) -> dict[str, Any]:
     if tag.get("remote_host") or tag.get("remote_model"):
         raise ValueError("a remote Ollama alias cannot be admitted as a local Executor")
+    details = _stable_show(details)
     return {
         "requested_tag": tag["name"],
         "ollama_manifest_digest": tag["digest"],

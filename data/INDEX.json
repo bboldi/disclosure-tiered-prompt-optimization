@@ -299,13 +299,252 @@
     },
     "calibration/history/calibration-benchmark-06": {
       "source_run": "calibration-20260913T084855614078Z"
+    },
+    "followups/naive-recheck-granite": {
+      "source_run": "verify-naive-20261028T105512Z",
+      "manifest_sha256": "1fddc6c0b3f9102340efeabb8ad7a8df125b8be2da83be796230ac9221ef13ad",
+      "copied": {
+        "evaluations": 384,
+        "panels": 3,
+        "hosted-key-usage": 1,
+        "pauses": 1
+      },
+      "resources": {
+        "committed_results": 384,
+        "local_attempts": 384,
+        "hosted_attempts": 0,
+        "hosted_attempts_without_reported_cost": 0,
+        "hosted_reported_cost_usd": 0.0,
+        "running_seconds_this_directory": 771.726
+      },
+      "excluded": [
+        "work/",
+        "checks/",
+        "telemetry/*/samples.jsonl",
+        "runtime/",
+        "sessions/",
+        "progress/",
+        "logical-keys/",
+        "operator*"
+      ],
+      "note": "follow-up run: naive-recheck-granite",
+      "derived": {
+        "work-summary.jsonl": 384
+      }
+    },
+    "followups/naive-recheck-qwen": {
+      "source_run": "verify-naive-qwen-20261028T111030Z",
+      "manifest_sha256": "140a49f66a8df942ae0552d5b9ede0f4f4dbaf12fca1dbb9e203350af368c8d5",
+      "copied": {
+        "evaluations": 384,
+        "panels": 3,
+        "reports": 1,
+        "hosted-key-usage": 2
+      },
+      "resources": {
+        "committed_results": 384,
+        "local_attempts": 384,
+        "hosted_attempts": 0,
+        "hosted_attempts_without_reported_cost": 0,
+        "hosted_reported_cost_usd": 0.0,
+        "running_seconds_this_directory": 607.695
+      },
+      "excluded": [
+        "work/",
+        "checks/",
+        "telemetry/*/samples.jsonl",
+        "runtime/",
+        "sessions/",
+        "progress/",
+        "logical-keys/",
+        "operator*"
+      ],
+      "note": "follow-up run: naive-recheck-qwen",
+      "derived": {
+        "work-summary.jsonl": 384
+      }
+    },
+    "followups/local-self-optimization": {
+      "source_run": "g33-self-opt-20261028T111213Z",
+      "manifest_sha256": "1f4dc5417d96a8e30b6ed89f6f8f14b811c9cb1b28f7772be484b973a2996d9f",
+      "copied": {
+        "trajectories": 10,
+        "decisions": 80,
+        "disclosures": 160,
+        "evaluations": 8136,
+        "selections": 12,
+        "sealed-panels": 15,
+        "reports": 2,
+        "hosted-key-usage": 2,
+        "candidate-failures": 29
+      },
+      "resources": {
+        "committed_results": 8296,
+        "local_attempts": 8363,
+        "hosted_attempts": 0,
+        "hosted_attempts_without_reported_cost": 0,
+        "hosted_reported_cost_usd": 0.0,
+        "running_seconds_this_directory": 27844.095
+      },
+      "excluded": [
+        "work/",
+        "checks/",
+        "telemetry/*/samples.jsonl",
+        "runtime/",
+        "sessions/",
+        "progress/",
+        "logical-keys/",
+        "operator*"
+      ],
+      "note": "follow-up run: local-self-optimization",
+      "derived": {
+        "work-summary.jsonl": 8296
+      }
+    },
+    "followups/shuffled-abstraction": {
+      "source_run": "g39-shuffled-20261028T151548Z",
+      "manifest_sha256": "40d702d1c71db6a6dffe3cb9f4cbb921c9bd00a9917d0a3e1e633962d8567aa6",
+      "copied": {
+        "trajectories": 5,
+        "decisions": 40,
+        "disclosures": 80,
+        "evaluations": 5376,
+        "selections": 6,
+        "sealed-panels": 15,
+        "reports": 2,
+        "hosted-key-usage": 2
+      },
+      "resources": {
+        "committed_results": 5456,
+        "local_attempts": 5376,
+        "hosted_attempts": 93,
+        "hosted_attempts_without_reported_cost": 7,
+        "hosted_reported_cost_usd": 0.307234,
+        "running_seconds_this_directory": 13947.715
+      },
+      "excluded": [
+        "work/",
+        "checks/",
+        "telemetry/*/samples.jsonl",
+        "runtime/",
+        "sessions/",
+        "progress/",
+        "logical-keys/",
+        "operator*"
+      ],
+      "note": "follow-up run: shuffled-abstraction",
+      "derived": {
+        "work-summary.jsonl": 5456
+      }
+    },
+    "followups/shuffled-abstraction-plain-tier2": {
+      "source_run": "g39-tier2-20261028T151548Z",
+      "manifest_sha256": "c973b26d9942d7b4052a9fae8de9ea79beab941729a38bb886b311e22f5b2821",
+      "copied": {
+        "trajectories": 5,
+        "decisions": 40,
+        "disclosures": 80,
+        "evaluations": 5328,
+        "selections": 6,
+        "sealed-panels": 15,
+        "reports": 2,
+        "hosted-key-usage": 3,
+        "candidate-failures": 2,
+        "pauses": 1
+      },
+      "resources": {
+        "committed_results": 5408,
+        "local_attempts": 5328,
+        "hosted_attempts": 100,
+        "hosted_attempts_without_reported_cost": 3,
+        "hosted_reported_cost_usd": 0.48634,
+        "running_seconds_this_directory": 14727.132
+      },
+      "excluded": [
+        "work/",
+        "checks/",
+        "telemetry/*/samples.jsonl",
+        "runtime/",
+        "sessions/",
+        "progress/",
+        "logical-keys/",
+        "operator*"
+      ],
+      "note": "follow-up run: shuffled-abstraction-plain-tier2",
+      "derived": {
+        "work-summary.jsonl": 5408
+      }
+    },
+    "followups/real-record-panel": {
+      "source_run": "g34-eval-20261029T145128Z",
+      "manifest_sha256": "a61f53c64d9e06772fa2baf0946bda8b5d5efc76aeac6e5de97dbdb885ef3786",
+      "copied": {
+        "evaluations": 1488,
+        "panels": 31,
+        "hosted-key-usage": 1,
+        "pauses": 1
+      },
+      "resources": {
+        "committed_results": 1488,
+        "local_attempts": 1488,
+        "hosted_attempts": 0,
+        "hosted_attempts_without_reported_cost": 0,
+        "hosted_reported_cost_usd": 0.0,
+        "running_seconds_this_directory": 5067.951
+      },
+      "excluded": [
+        "work/",
+        "checks/",
+        "telemetry/*/samples.jsonl",
+        "runtime/",
+        "sessions/",
+        "progress/",
+        "logical-keys/",
+        "operator*"
+      ],
+      "note": "follow-up run: real-record-panel",
+      "derived": {
+        "work-summary.jsonl": 1488
+      }
+    },
+    "followups/real-record-panel-hosted": {
+      "source_run": "g34-opus-20261029T161744Z",
+      "manifest_sha256": "a5c6661d8b637091ccaf0b01fc34cfa0d08535774f04702fea05e719ddd5ecba",
+      "copied": {
+        "evaluations": 48,
+        "panels": 1,
+        "reports": 1,
+        "hosted-key-usage": 2
+      },
+      "resources": {
+        "committed_results": 48,
+        "local_attempts": 0,
+        "hosted_attempts": 48,
+        "hosted_attempts_without_reported_cost": 0,
+        "hosted_reported_cost_usd": 2.618425,
+        "running_seconds_this_directory": 453.166
+      },
+      "excluded": [
+        "work/",
+        "checks/",
+        "telemetry/*/samples.jsonl",
+        "runtime/",
+        "sessions/",
+        "progress/",
+        "logical-keys/",
+        "operator*"
+      ],
+      "note": "follow-up run: real-record-panel-hosted",
+      "derived": {
+        "work-summary.jsonl": 48
+      }
     }
   },
   "exports": {
-    "evaluations.csv": 52046,
-    "trajectories.csv": 51,
-    "decisions.csv": 384,
-    "disclosures.jsonl": 798,
-    "panels.csv": 121
+    "evaluations.csv": 73190,
+    "trajectories.csv": 71,
+    "decisions.csv": 544,
+    "disclosures.jsonl": 1118,
+    "panels.csv": 172
   }
 }

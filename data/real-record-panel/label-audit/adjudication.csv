@@ -1,0 +1,5 @@
+row,cve_id,sample,stratum,blind_label,reference_label,adjudicated_label,class,reason
+R032,CVE-2024-58248,A,not_affected,unsure,no,unsure,genuine ambiguity,"Description says through 4.90.1; the entry says below 4.80.0; installed 4.80.0"
+R099,CVE-2025-65078,B,off_inventory,yes,no,yes,reference error,"Entry lists CXLBN below 230.507; cxlbn_firmware 230.041 installed; matcher did not split the comma-separated product list"
+R033,CVE-2024-0566,B,positives,no,yes,no,reference error,"Record is the WordPress plugin Smart Manager; matcher matched Cisco Smart Software Manager by shared words"
+R084,CVE-2024-6077,B,positives,no,yes,no,reference error under the guide's rule,"CNA lists CompactLogix 5480 at v.32.011 with default unaffected; installed 34.011; only the ADP range covers it and the guide lets the CNA win"

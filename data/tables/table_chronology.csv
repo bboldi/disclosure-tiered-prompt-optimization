@@ -7,8 +7,15 @@ Start (from run identifier),Event,Released run
 2026-09-15 16:33 UTC,Campaign lineage segment,campaign-continuation2-20260915T163316472182Z
 2026-09-15 19:58 UTC,"Phase 3 campaign, final continuation (complete journal)",campaign-continuation3-20260915T195841504137Z
 2026-09-16 06:28 UTC,"Hosted reference rows: Claude Opus 5, GLM-5.3 (Reka)",ceiling-20260916T062840690487Z
-2026-09-16 06:37 UTC,"Claude Opus 5 as optimizer, both executors, Tier 2",opus-optimizer-20260916T063711272344Z
+2026-09-16 06:37 UTC,"Claude Opus 5 as Optimizer, both Executors, Tier 2",opus-optimizer-20260916T063711272344Z
 2026-09-16 09:19 UTC,Hosted reference row: GLM-5.3 (AkashML) after WAF block,ceiling-glm-akashml-20260916T091957232998Z
 2026-09-16 12:09 UTC,Local naive-prompt rows on all sealed panels,naive-local-20260916T120958887286Z
 2026-09-16 13:46 UTC,Input-matched deterministic rule baseline,rule-baseline-20260916T134655074838Z
 2026-09-16 21:40 UTC,"Repetition extension, final continuation (complete journal)",extension-continuation6-20260916T214036169830Z
+2026-10-28 10:55 UTC,"Revision: naive-prompt re-check, Granite",verify-naive-20261028T105512Z
+2026-10-28 11:10 UTC,"Revision: naive-prompt re-check, Qwen",verify-naive-qwen-20261028T111030Z
+2026-10-28 11:12 UTC,"Revision: local self-optimization, Tier 3",g33-self-opt-20261028T111213Z
+2026-10-28 15:15 UTC,"Revision: Shuffled Abstraction, Granite, Tier 2",g39-shuffled-20261028T151548Z
+2026-10-28 15:15 UTC,Revision: plain Tier 2 on the new endpoint,g39-tier2-20261028T151548Z
+2026-10-29 14:51 UTC,"Revision: Real-Record Panel, local passes",g34-eval-20261029T145128Z
+2026-10-29 16:17 UTC,"Revision: Real-Record Panel, hosted pass",g34-opus-20261029T161744Z

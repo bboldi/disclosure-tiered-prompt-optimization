@@ -1,4 +1,4 @@
-Model,Run,Test F1 / recall,Temporal F1 / recall,Held-out F1 / recall,Coverage,Temperature 0
+Model,Run,Test F1 / recall,2025-records F1 / recall,Disjoint-product F1 / recall,Coverage,Temperature 0
 GLM-5.3 (hosted),ceiling-glm-akashml,0.880 / 0.935,0.830 / 0.974,0.930 / 1.000,"1.000, 0.990, 1.000",yes
 Claude Opus 5 (hosted),ceiling-opus-and-glm-reka,0.970 / 0.997,0.956 / 1.000,0.971 / 1.000,"1.000, 1.000, 1.000",no
 GLM-5.3 (hosted),ceiling-opus-and-glm-reka,—,—,0.899 / 0.987,1.000,yes

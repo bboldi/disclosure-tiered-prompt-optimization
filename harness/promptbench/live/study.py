@@ -22,7 +22,12 @@ from ..domain import metrics
 from ..runner import RunPaused, utc_now
 from ..storage import IntegrityError, Store, digest
 from .campaign import Campaign, freeze_runtime, prepare, profiles_from, verify_runtime
-from .conditions import NAIVE, optimizer_request, study_feedback_request
+from .conditions import (
+    NAIVE,
+    optimizer_request,
+    self_optimizer_condition,
+    study_feedback_request,
+)
 from .execution import Execution
 from .progress import Progress
 from .scheduling import utility
@@ -95,8 +100,16 @@ def build_manifest(
 ) -> dict[str, Any]:
     local = {c["id"]: c for c in conditions["local"]}
     hosted = {c["id"]: c for c in conditions["hosted"]}
-    if any(e not in local for e in design["executors"]) or design["optimizer"] not in hosted:
+    self_optimizing = design["optimizer"] == "self"
+    if any(e not in local for e in design["executors"]) or (
+        not self_optimizing and design["optimizer"] not in hosted
+    ):
         raise IntegrityError("design names a condition absent from the frozen registry")
+    if self_optimizing and any(e + "/self-optimizer" not in local for e in design["executors"]):
+        raise IntegrityError("self-optimization needs an Optimizer condition per executor")
+    variant = design.get("feedback_variant")
+    if variant not in (None, "shuffled") or (variant == "shuffled" and design["tiers"] != [2]):
+        raise IntegrityError("the shuffled feedback variant runs at Tier 2 only")
     if len(set(design["executors"])) != len(design["executors"]):
         raise IntegrityError("duplicate executor in design")
     if any(t not in TIERS for t in design["tiers"]) or not design["tiers"]:
@@ -149,7 +162,9 @@ def build_manifest(
                         "repetition": rep,
                     }
                 )
-    endpoint = hosted[design["optimizer"]]["endpoint"]
+    seeded = self_optimizing or "seed" in hosted[design["optimizer"]]["endpoint"].get(
+        "supported_parameters", []
+    )
     return {
         "design": design,
         "schedules": {str(i + 1): s for i, s in enumerate(schedules)},
@@ -160,7 +175,7 @@ def build_manifest(
             * (per["local_search"] + per["local_selection"] + per["local_sealed"]),
             "hosted": len(trajectories) * per["hosted"],
         },
-        "hosted_seed_supported": "seed" in endpoint.get("supported_parameters", []),
+        "hosted_seed_supported": seeded,
         "partition_counts": counts,
         "profile_sha256": digest([p.record() for p in sorted(profiles, key=lambda p: p.id)]),
         "replication_contract": (
@@ -195,6 +210,14 @@ def default_design(promoted: list[str]) -> dict[str, Any]:
         "reference": None,
         "defer_generation_metadata": True,
         "first_repetition": 1,
+        # round 1 revision: optimizer "self" puts each Executor's own model in the Optimizer role
+        "self_optimizer": {
+            "think": "low",
+            "num_ctx": 32768,
+            "num_predict": 8192,
+            "timeout_seconds": 900,
+        },
+        "feedback_variant": None,
     }
 
 
@@ -220,8 +243,12 @@ def prepare_study(
         raise IntegrityError("study requires a passing calibration gate")
     if parent.get("plan.json")["benchmark_sha256"] != digest(Store(benchmark).get("manifest.json")):
         raise IntegrityError("study must use the benchmark admitted by calibration")
-    if int(design.get("first_repetition", 1)) == 1 and any(
-        e not in design["executors"] for e in verdict["promoted"]
+    # revision arms (round 1 revision) may run on a subset of the promoted executors
+    if (
+        int(design.get("first_repetition", 1)) == 1
+        and not design.get("feedback_variant")
+        and not design.get("revision_arm")
+        and any(e not in design["executors"] for e in verdict["promoted"])
     ):
         raise IntegrityError("design must include every gate-promoted executor")
     config: dict[str, Any] = {
@@ -259,6 +286,12 @@ def prepare_study(
         }:
             condition["num_predict"] = design["output_tokens"]
             condition["timeout_seconds"] = 300
+    if design["optimizer"] == "self":
+        conditions["local"] += [
+            self_optimizer_condition(c, design["self_optimizer"])
+            for c in conditions["local"]
+            if c["id"] in design["executors"]
+        ]
     store.put("inputs/study_conditions.json", conditions)
     manifest = build_manifest(design, profiles_from(store), conditions)
     steps = manifest["upper_bound_calls"]
@@ -518,18 +551,17 @@ class Study:
         return self.campaign.evaluate(prefix, executor, prompt, profiles)
 
     def hosted_seed(self, hosted: dict[str, Any], repetition: int) -> int | None:
-        if "seed" in hosted["endpoint"].get("supported_parameters", []):
+        if hosted["provider"] == "ollama" or "seed" in hosted["endpoint"].get(
+            "supported_parameters", []
+        ):
             return int(self.design["hosted_seed_base"]) + repetition
         return None
 
     def propose(
         self, key: str, hosted: dict[str, Any], permitted: dict[str, Any], seed: int | None
     ) -> str | None:
-        if any(
-            r["partition"] != "optimization"
-            for r in (permitted.get("feedback") or {}).get("rows", [])
-        ):
-            raise IntegrityError("optimizer feedback derived from a sealed partition")
+        # The partition guard lives in study_feedback_request, which builds `permitted` from
+        # rows and profiles; the serialized feedback no longer carries rows to re-check here.
         # Hosted identity is verified once per controller session; every response is still
         # checked against the frozen model/provider by Execution.call.
         self.campaign.check(hosted)
@@ -548,7 +580,9 @@ class Study:
         self.keys.setdefault(key.split("/", 1)[0], []).append(key)
         result = self.execution.call(key, condition, body, role="optimizer")
         if result["status"] == "valid":
-            if self.design.get("defer_generation_metadata", False):
+            if hosted["provider"] != "openrouter":
+                pass  # local Optimizer: no provider generation record to fetch
+            elif self.design.get("defer_generation_metadata", False):
                 # Metadata only; fetched offline by the `reconcile` action after the campaign.
                 self.store.put(
                     "generation-pending/" + digest(result["attempt"]) + ".json",
@@ -632,9 +666,14 @@ class Study:
     # ----- arms --------------------------------------------------------------------------
     def trajectory(self, arm: str, item: dict[str, Any]) -> dict[str, Any]:
         executor, tier, rep = self.local[item["executor"]], item["tier"], item["repetition"]
-        hosted = self.hosted[
-            self.design["reference_optimizer"] if arm == "reference" else self.design["optimizer"]
-        ]
+        if arm == "main" and self.design["optimizer"] == "self":
+            hosted = self.local[executor["id"] + "/self-optimizer"]
+        else:
+            hosted = self.hosted[
+                self.design["reference_optimizer"]
+                if arm == "reference"
+                else self.design["optimizer"]
+            ]
         prefix = f"{arm}/{executor['id']}/T{tier}/R{rep}"
         name = "trajectories/" + digest(prefix) + ".json"
         if self.store.exists(name):
@@ -652,7 +691,17 @@ class Study:
                 proposed = self.propose(
                     f"{prefix}/r{round_index}/proposal{slot}",
                     hosted,
-                    study_feedback_request(incumbent, rows, batch, tier=tier, candidate=slot),
+                    study_feedback_request(
+                        incumbent,
+                        rows,
+                        batch,
+                        tier=tier,
+                        candidate=slot,
+                        variant=self.design.get("feedback_variant"),
+                        shuffle_seed=int(
+                            digest(f"{prefix}/r{round_index}/proposal{slot}")[:16], 16
+                        ),
+                    ),
                     seed,
                 )
                 if proposed is None:
@@ -682,6 +731,7 @@ class Study:
             {
                 "arm": arm,
                 "optimizer": hosted["id"],
+                "feedback_variant": self.design.get("feedback_variant"),
                 "tier": tier,
                 "repetition": rep,
                 "hosted_seed_sent": seed,
@@ -904,7 +954,11 @@ def main() -> int:
     parser.add_argument(
         "--only-executors", nargs="*", help="restrict an extension run to these executors"
     )
-    parser.add_argument("--optimizer", default="z-ai/glm-5.3")
+    parser.add_argument("--optimizer", default="z-ai/glm-5.3", help='"self" for self-optimization')
+    parser.add_argument("--feedback-variant", choices=("shuffled",))
+    parser.add_argument(
+        "--revision-arm", help="label of a round 1 revision arm (may run a subset of executors)"
+    )
     parser.add_argument("--reference-optimizer", default="deepseek/deepseek-v4-pro")
     parser.add_argument("--tiers", nargs="*", type=int, default=list(TIERS))
     parser.add_argument("--repetitions", type=int, default=5)
@@ -965,7 +1019,10 @@ def main() -> int:
             candidates_per_round=args.candidates,
             batch_size=args.batch_size,
             output_tokens=args.output_tokens,
+            feedback_variant=args.feedback_variant,
         )
+        if args.revision_arm:
+            design["revision_arm"] = args.revision_arm
         if args.gepa_repetitions:
             design["gepa"] = {
                 "executor": promoted[0],

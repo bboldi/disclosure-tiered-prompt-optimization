@@ -1,4 +1,4 @@
-**Tier 2 optimizer portability on the sealed test panel, repetitions 1 to 3, matched budgets.**
+**Tier 2 Optimizer portability on the sealed test panel, repetitions 1 to 3, matched budgets.**
 
 | Optimizer | Executor | Trajectories | Prompt changed | Test F1 per repetition | Mean F1 | Mean recall |
 |---|---|---|---|---|---|---|

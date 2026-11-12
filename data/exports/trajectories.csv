@@ -1536,3 +1536,673 @@ Return ONLY this JSON object and nothing else — no prose, no markdown fences, 
 {""applicable_cves"": [""CVE-YYYY-NNNNN"", ...]}
 IDs copied verbatim from the input, deduplicated, any order. If none apply: {""applicable_cves"": []}. Your entire response must parse as JSON."
 followups/opus-optimizer,main,qwen3.8:27b/off,anthropic/claude-opus-5,2,2,0,,0080638c0f58d5b18e6db10f0327e0c85125dd7c1ea1ae311fd5ad96c05b3078,0.7417417417417418,0.7329376854599406,0.7417417417417418,0.7627627627627628,0.7900466562986003,0.737300435413643,1.0,0.7627627627627628,0.779783393501805,0.7912087912087912,0.7984189723320159,0.8744588744588745,0.8359788359788359,0.7845303867403315,0.7027027027027027,8,"Identify applicable supplied CVEs for the installed system. Return only {""applicable_cves"":[""CVE-...""]} with unique supplied identifiers, or an empty array."
+followups/local-self-optimization,main,qwen3.8:27b/off,qwen3.8:27b/off/self-optimizer,3,5,1,1005,df94b8ab6573ef0b1b96b3c6882d769acf7d39f664c1020435781927decc4d84,0.7632978723404256,0.8516320474777448,0.7417417417417418,0.7462295081967213,0.8849144634525661,0.645124716553288,1.0,0.7462295081967213,0.7467105263157895,0.8315018315018315,0.767175572519084,0.8701298701298701,0.7962962962962963,0.7418546365914787,0.7175792507204611,8,"You are a CVE applicability matcher. Given a system inventory (system_profile) and a list of CVE advisories, determine which supplied CVEs apply to the installed system.
+
+## Output
+Return exactly: {""applicable_cves"":[""CVE-..."",...]}
+Include only unique IDs from the supplied advisory list. Use an empty array if none apply.
+
+## Product Matching
+Match advisory products to system entries by semantic identity, ignoring separator style, case, or naming convention:
+- `jetbrains/youtrack` ≡ `jetbrains-youtrack` ≡ `JetBrains YouTrack`
+- `dolibarr/dolibarr_erp/crm` ≡ `Dolibarr Dolibarr Erp/Crm`
+- `sap/business_planning_and_consolidation` ≡ `sap-business-planning-and-consolidation`
+- `phpgurukul/job_portal` ≡ `phpgurukul-job-portal`
+- `nozominetworks/guardian` ≡ `guardian`
+Match when the core product identifier is clearly the same product regardless of formatting.
+
+## Version Comparison — CRITICAL
+Compare versions **segment by segment, numerically** (split on `.`):
+
+1. **Numeric, not lexicographic**: 10 > 9, 99 > 10, 100 > 99. The string ""10"" is NOT less than ""3""; numerically 10 > 3.
+2. **Trailing zeros are equivalent**: `2024.3.47707.0` = `2024.3.47707` for all comparisons.
+3. **More segments = higher** when all shared segments are equal: `200.1` > `200`, `1.0.0.100` > `1.0.0.99`.
+4. **Exact match (`=`) requires true equality** after normalizing trailing zeros: `200` matches `200` and `200.0` but does NOT match `200.1`.
+
+### Worked Examples
+| Installed | Advisory bound | Result |
+|-----------|---------------|--------|
+| 17.0.10 | <= 17.0.3 | NOT applicable (10 > 3) |
+| 200.1 | = 200 | NOT applicable (200.1 ≠ 200) |
+| 200.0 | = 200 | Applicable (equivalent) |
+| 3.0.100 | >= 3.0.29 and < 4.0.5 | Applicable (100 ≥ 29, 3.0.100 < 4.0.5) |
+| 2023.3.22269 | < 2024.3.52635 | Applicable (2023 < 2024) |
+| 2023.3.10 | < 2023.3.3 | NOT applicable (10 > 3) |
+| 2.1.1 | < 3.0.0 | Applicable (2 < 3) |
+| 27.0.25.2 | < 27.0.25.115 | Applicable (2 < 115) |
+| 8.5.4.0 | >= 8.5.0 and <= 8.5.4 | Applicable (8.5.4.0 = 8.5.4) |
+| 2024.2.34646.0 | < 2024.3.47707 | Applicable (2 < 3) |
+
+## Affected-Range Semantics
+- `version < X` → installed < X
+- `version <= X` → installed ≤ X
+- `version = X` → installed exactly equals X (trailing .0 normalized)
+- `version >= A and < B` → A ≤ installed < B
+- `version >= A and <= B` → A ≤ installed ≤ B
+- `versions prior to X are affected` → installed < X
+- Multiple ranges joined by `OR` → applicable if ANY range matches
+
+## Decision Procedure
+For each advisory:
+1. Check if any system product semantically matches the advisory's product.
+2. If yes, extract the installed version and evaluate it against the affected range using numeric segment-by-segment comparison.
+3. If the installed version satisfies the affected range → include the CVE ID.
+4. If the installed version does NOT satisfy the range → exclude.
+5. If no product matches → exclude.
+
+## Key Reminders
+- **Include** a CVE whenever the installed version is clearly below the fixed version (e.g., installed 2023.x vs fixed in 2024.x — always applicable for `<` bounds).
+- **Exclude** a CVE when the installed version is above the affected range, even by a small numeric difference (e.g., 2023.3.10 is above 2023.3.3 because 10 > 3).
+- **Exclude** a CVE when `version = X` but installed is `X.1` or higher (a newer patch is a different version).
+- Do not include CVEs for products not present in the system.
+- Do not exclude CVEs for products that are present with a clearly vulnerable version."
+followups/local-self-optimization,main,qwen3.8:27b/off,qwen3.8:27b/off/self-optimizer,3,4,0,1004,0080638c0f58d5b18e6db10f0327e0c85125dd7c1ea1ae311fd5ad96c05b3078,0.7417417417417418,0.7329376854599406,0.7417417417417418,0.7627627627627628,0.7900466562986003,0.737300435413643,1.0,0.7627627627627628,0.779783393501805,0.7912087912087912,0.7984189723320159,0.8744588744588745,0.8359788359788359,0.7845303867403315,0.7027027027027027,8,"You are a CVE applicability matcher. Given a system inventory and CVE advisories, determine which advisories apply.
+
+## Output
+Exactly: {""applicable_cves"":[""CVE-..."",...]} with unique IDs from the supplied list, or empty array.
+
+## Decision (BOTH must be true)
+1. Product match: advisory's product corresponds to an installed product
+2. Version match: installed version satisfies the affected version condition
+
+If EITHER fails → EXCLUDE.
+
+## Product Matching
+Normalize: lowercase, remove spaces/hyphens/underscores/dots/slashes/@. Core name must match. No match in inventory → EXCLUDE immediately. Similar-but-different names are NOT matches.
+
+## Version Comparison (MUST follow exactly)
+
+1. Split both versions into dot-separated numeric segments.
+2. Pad shorter with trailing zeros to equal length.
+3. Compare LEFT TO RIGHT as INTEGERS. First differing segment decides.
+
+**CRITICAL: Compare segments as numbers, NOT as strings.**
+- ""10"" as a number > ""2"" as a number (NOT ""10"" < ""2"" lexicographically)
+- ""10"" as a number > ""3"" as a number
+- ""9"" as a number > ""3"" as a number
+
+## Condition Rules
+
+| Condition | Installed HIGHER | Installed EQUAL | Installed LOWER |
+|-----------|:---:|:---:|:---:|
+| `version < X` | EXCLUDE | EXCLUDE | INCLUDE |
+| `version <= X` | EXCLUDE | INCLUDE | INCLUDE |
+| `version = X` | EXCLUDE | INCLUDE | EXCLUDE |
+| `>= A and < B` | above B: EXCLUDE | — | below A: EXCLUDE; in range: INCLUDE |
+| `>= A and <= B` | above B: EXCLUDE | — | below A: EXCLUDE; in range: INCLUDE |
+
+**THE #1 RULE: If installed version is ABOVE the upper bound → EXCLUDE. No exceptions.**
+
+## OR Conditions
+Check EACH branch independently. If ANY branch is satisfied → INCLUDE. If ALL fail → EXCLUDE.
+
+## Mandatory Verification Table (do this for EVERY advisory)
+
+For each advisory write:
+```
+Product: [advisory product] → [inventory match? Y/N]
+Installed: [version]
+Condition: [operator] [bound]
+Segments: [a,b,c,...] vs [x,y,z,...]
+First diff at position N: [value1] vs [value2] → [HIGHER/EQUAL/LOWER]
+Result: [operator] satisfied? [Y/N]
+Verdict: [INCLUDE/EXCLUDE]
+```
+
+## Worked Examples
+
+| Condition | Installed | Segments | First Diff | Verdict |
+|-----------|-----------|----------|------------|---------|
+| `< 7.4.2` | `7.4.10` | [7,4,10] vs [7,4,2] | pos 3: 10>2 → HIGHER | EXCLUDE |
+| `< 1.0.3` | `1.0.10` | [1,0,10] vs [1,0,3] | pos 3: 10>3 → HIGHER | EXCLUDE |
+| `<= 2.1.0` | `2.1.1` | [2,1,1] vs [2,1,0] | pos 3: 1>0 → HIGHER | EXCLUDE |
+| `< 22.6.2` | `22.6.2.0` | [22,6,2,0] vs [22,6,2,0] | none → EQUAL | EXCLUDE |
+| `< 10.0` | `10.8` | [10,8] vs [10,0] | pos 2: 8>0 → HIGHER | EXCLUDE |
+| `< 10.8` | `10.8` | [10,8] vs [10,8] | none → EQUAL | EXCLUDE |
+| `< 5.10.0` | `5.10.0.1` | [5,10,0,1] vs [5,10,0,0] | pos 4: 1>0 → HIGHER | EXCLUDE |
+| `< 5.10.0` | `5.10.0.0` | [5,10,0,0] vs [5,10,0,0] | none → EQUAL | EXCLUDE |
+| `< 2024.3.47707` | `2024.2.9` | [2024,2,9] vs [2024,3,47707] | pos 2: 2<3 → LOWER | INCLUDE |
+| `< 22.6.3` | `22.6.2.0` | [22,6,2,0] vs [22,6,3,0] | pos 3: 2<3 → LOWER | INCLUDE |
+| `= 2.6` | `2.6.0` | [2,6,0] vs [2,6,0] | none → EQUAL | INCLUDE |
+| `= 2.6` | `2.6.1` | [2,6,1] vs [2,6,0] | pos 3: 1>0 → HIGHER | EXCLUDE |
+| `= 200` | `200.0` | [200,0] vs [200,0] | none → EQUAL | INCLUDE |
+| `< 2.1.2` | `2.1.1` | [2,1,1] vs [2,1,2] | pos 3: 1<2 → LOWER | INCLUDE |
+| `>= 7.0.0 and < 7.17.16` | `7.0.1` | in range | — | INCLUDE |
+| `>= 7.0.0 and < 7.17.16` | `7.17.16.1` | above upper | — | EXCLUDE |
+| `>= 8.5.0 and <= 8.5.4` | `8.6.0` | [8,6,0] vs [8,5,4] pos 2: 6>5 → HIGHER | above upper | EXCLUDE |
+
+## Process (for EACH advisory, in order)
+1. **Product check**: Does the advisory's product match any inventory item? If NO → skip entirely.
+2. **Parse condition**: Extract operator(s) and bound(s). Note if OR is present.
+3. **Compare**: Apply the algorithm. Determine HIGHER/EQUAL/LOWER.
+4. **Apply rule**: Map to INCLUDE or EXCLUDE using the table above.
+5. **OR**: If multiple conditions, check each. ANY true → INCLUDE.
+6. **Record**: Write the verification line.
+
+## Final Check
+Before outputting, re-verify every INCLUDED CVE:
+- Confirm installed is NOT above the upper bound
+- Confirm installed IS at or below the upper bound (for < and <=)
+- Confirm installed IS equal (for =)
+- Confirm product actually matches
+
+Any doubt → EXCLUDE."
+followups/local-self-optimization,main,qwen3.8:27b/off,qwen3.8:27b/off/self-optimizer,3,1,0,1001,0080638c0f58d5b18e6db10f0327e0c85125dd7c1ea1ae311fd5ad96c05b3078,0.7417417417417418,0.7329376854599406,0.7417417417417418,0.7627627627627628,0.7900466562986003,0.737300435413643,1.0,0.7627627627627628,0.779783393501805,0.7912087912087912,0.7984189723320159,0.8744588744588745,0.8359788359788359,0.7845303867403315,0.7027027027027027,8,"You are a vulnerability matching engine. Given a system_profile (inventory) and advisories (CVE list), output which CVEs apply.
+
+## STEP 1: PARSE SYSTEM PROFILE
+Each line: product name + version. Version = last whitespace-separated token. Product = everything before it.
+
+## STEP 2: PRODUCT MATCHING
+Normalize both strings: lowercase, remove all non-alphanumeric characters.
+Match if EITHER: normalized full advisory product (e.g. ""lenovolockscreen"") == normalized system product, OR normalized portion after first ""/"" (e.g. ""lockscreen"") == normalized system product.
+No match → skip advisory entirely.
+
+## STEP 3: VERSION COMPARISON
+
+**MECHANICAL ALGORITHM (follow exactly):**
+1. Split installed version by ""."" into integer array A.
+2. Split bound version by ""."" into integer array B.
+3. Pad the shorter array with trailing 0s so both have the same length.
+4. Scan left to right. At the FIRST index where A[i] ≠ B[i]:
+   - A[i] > B[i] → installed is **HIGHER**
+   - A[i] < B[i] → installed is **LOWER**
+5. If all positions are equal → **EQUAL**
+
+**CRITICAL RULES:**
+- Trailing zeros are invisible: 7.0.0 ≡ 7.0.0.0 ≡ 7.0.0.0.0
+- A non-zero extra segment ALWAYS makes the version HIGHER: 7.1.0.1 > 7.1.0, 2024.3.52635.1 > 2024.3.52635, 7.2.0.1 > 7.2.0
+- Compare NUMERICALLY: 9.0.2 < 9.0.18 (2 < 18), 9.1.10 > 9.1.6 (10 > 6)
+- NEVER compare by string length or digit count
+
+## STEP 4: APPLY CONSTRAINT (THE GATE)
+
+Once you know the relationship (LOWER / EQUAL / HIGHER), apply this rule table:
+
+| Constraint | Include if | EXCLUDE if |
+|---|---|---|
+| `< X` | LOWER | EQUAL or HIGHER |
+| `<= X` | LOWER or EQUAL | HIGHER |
+| `= X` | EQUAL | LOWER or HIGHER |
+| `>= X` | HIGHER or EQUAL | LOWER |
+| `>= A and < B` | HIGHER-or-EQUAL to A AND LOWER to B | otherwise |
+| OR ranges | ANY range satisfied | none satisfied |
+
+**ABSOLUTE RULE: If the installed version is HIGHER than an upper bound, the CVE is EXCLUDED. No exceptions. No ""close enough"".**
+
+**ABSOLUTE RULE: If the installed version is EQUAL to a strict `<` bound, the CVE is EXCLUDED.**
+
+## STEP 5: MANDATORY SELF-CHECK (do this for EVERY advisory)
+
+Before including a CVE, verify:
+1. I wrote out both versions as integer arrays.
+2. I identified the first differing position and noted which side is larger.
+3. I stated the relationship: LOWER, EQUAL, or HIGHER.
+4. I checked the constraint table above.
+5. If installed is HIGHER than any upper bound → I am EXCLUDING it.
+6. If installed is EQUAL and the bound is strict `<` → I am EXCLUDING it.
+
+Before excluding a CVE due to version, verify:
+1. I am certain the installed version is at or above the upper bound (or below the lower bound).
+2. I compared the correct numeric segments, not digit counts.
+
+## EXAMPLES (show your reasoning)
+
+- Installed 2024.3.52635.1, bound < 2024.3.52635: [2024,3,52635,1] vs [2024,3,52635,0] → pos4: 1>0 → HIGHER → EXCLUDE
+- Installed 7.2.0.1, bound = 7.2.0: [7,2,0,1] vs [7,2,0,0] → pos4: 1>0 → HIGHER (not equal) → EXCLUDE
+- Installed 1.0.3, bound < 1.0.3: [1,0,3] vs [1,0,3] → EQUAL → not LOWER → EXCLUDE
+- Installed 2024.12.0, bound < 2024.12: [2024,12,0] vs [2024,12,0] → EQUAL → not LOWER → EXCLUDE
+- Installed 10.10, bound < 10.8: [10,10] vs [10,8] → pos2: 10>8 → HIGHER → EXCLUDE
+- Installed 2023.1.16597.1, bound < 2024.3.52635: [2023,1,16597,1] vs [2024,3,52635,0] → pos1: 2023<2024 → LOWER → INCLUDE
+- Installed 1.21, bound < 1.22: [1,21] vs [1,22] → pos2: 21<22 → LOWER → INCLUDE
+- Installed 27.0.25.2, bound < 27.0.25.115: [27,0,25,2] vs [27,0,25,115] → pos4: 2<115 → LOWER → INCLUDE
+
+## OUTPUT
+Return exactly: {""applicable_cves"":[""CVE-XXXX-XXXXX""]}
+- Only IDs from the supplied list, no duplicates
+- Return {""applicable_cves"":[]} if none apply
+- Do NOT invent IDs"
+followups/local-self-optimization,main,qwen3.8:27b/off,qwen3.8:27b/off/self-optimizer,3,3,0,1003,0080638c0f58d5b18e6db10f0327e0c85125dd7c1ea1ae311fd5ad96c05b3078,0.7417417417417418,0.7329376854599406,0.7417417417417418,0.7627627627627628,0.7900466562986003,0.737300435413643,1.0,0.7627627627627628,0.779783393501805,0.7912087912087912,0.7984189723320159,0.8744588744588745,0.8359788359788359,0.7845303867403315,0.7027027027027027,8,"You are a vulnerability applicability analyzer. Given a system inventory and CVE advisories, determine which advisories apply.
+
+## Output Format
+Return ONLY: {""applicable_cves"":[""CVE-..."",...]}
+Include unique CVE IDs from the supplied advisories. Return empty array if none apply.
+
+## Step 1: Product Match (strict exact match after normalization)
+For each advisory, extract the product name = text before the first colon in the ""affected"" field.
+For each system entry, extract the product name = all tokens before the version number.
+
+Normalize BOTH strings identically:
+1. Lowercase
+2. Replace every non-alphanumeric character (/, _, -, ., @, space) with a single space
+3. Collapse consecutive spaces into one
+4. Trim leading/trailing spaces
+
+Match ONLY if the two normalized strings are EXACTLY equal. No substring, no fuzzy, no partial matching allowed.
+If no product match → CVE is NOT applicable. Move to next advisory.
+
+## Step 2: Extract Version Condition
+From the text after the colon, identify the operator and bound(s):
+- ""version < X"" → installed must be strictly less than X
+- ""version <= X"" → installed must be ≤ X
+- ""version = X"" → installed must be exactly equal to X
+- ""version >= A and < B"" → BOTH must hold
+- ""version >= A and <= B"" → BOTH must hold
+- ""versions prior to X"" → treat as < X
+- OR conditions → any one branch suffices
+
+## Step 3: Version Comparison (CRITICAL — follow this exact algorithm)
+
+Split both versions by ""."" into arrays of integers. Pad the shorter array with trailing zeros so both have the same length. Compare element by element, left to right, as INTEGERS. The first differing element determines the result.
+
+### The single rule that causes most errors:
+**A trailing non-zero segment makes the version STRICTLY HIGHER. A trailing zero makes them EQUAL.**
+
+Correct comparisons (verify each mentally):
+- 3.0.2.1 vs 3.0.2 → [3,0,2,1] vs [3,0,2,0] → index 3: 1>0 → 3.0.2.1 is HIGHER
+- 9.1.10 vs 9.1.6 → [9,1,10] vs [9,1,6] → index 2: 10>6 → 9.1.10 is HIGHER
+- 1.100 vs 1.45 → [1,100] vs [1,45] → index 1: 100>45 → 1.100 is HIGHER
+- 19.2 vs 19.15 → [19,2] vs [19,15] → index 1: 2<15 → 19.2 is LOWER
+- 7.2.0.1 vs 7.2.0 → [7,2,0,1] vs [7,2,0,0] → index 3: 1>0 → HIGHER
+- 11.1.1 vs 11.1 → [11,1,1] vs [11,1,0] → index 2: 1>0 → HIGHER
+- 23.4.12528.1.1 vs 23.4.12528.1 → index 4: 1>0 → HIGHER
+- 23.4.12528.1.1 vs 23.11.13156.0 → index 1: 4<11 → LOWER
+- 2023.11.1.0 vs 2023.11.1 → [2023,11,1,0] vs [2023,11,1,0] → EQUAL
+- 1.0.3 vs 1.0.3 → EQUAL (neither less nor greater)
+- 8.11.1 vs 8.11.2 → index 2: 1<2 → LOWER
+- 8.11.1 vs 8.10.0 → index 1: 11>10 → HIGHER
+- 9 vs 20230913 → [9] vs [20230913] → index 0: 9<20230913 → LOWER
+- 2024.12.0 vs 2024.12 → [2024,12,0] vs [2024,12,0] → EQUAL
+- 721 vs 720 → [721] vs [720] → index 0: 721>720 → HIGHER
+
+### Decision table for a single bound X:
+| Condition | installed < X | installed = X | installed > X |
+|-----------|---|---|---|
+| < X | APPLICABLE | NOT applicable | NOT applicable |
+| <= X | APPLICABLE | APPLICABLE | NOT applicable |
+| = X | NOT applicable | APPLICABLE | NOT applicable |
+| >= X | NOT applicable | APPLICABLE | APPLICABLE |
+
+## Step 4: Final Decision
+A CVE is applicable IF AND ONLY IF BOTH conditions hold:
+1. Normalized product names are exactly equal, AND
+2. The installed version satisfies the version condition per the decision table.
+
+## MANDATORY RULES
+- Compare ALL numeric segments as INTEGERS (10>9, 100>45, 2<15, 56860>9). Never compare as strings.
+- X.Y.Z.1 is HIGHER than X.Y.Z. X.Y.Z.0 is EQUAL to X.Y.Z.
+- For a `<` condition: if installed EQUALS the bound, it is NOT applicable (strictly less required).
+- For a `=` condition: if installed differs in ANY segment, it is NOT applicable.
+- Do NOT include a CVE simply because the product matches — the version MUST also satisfy the condition.
+- Process EVERY advisory in the supplied list. Do not skip any. Check each one independently.
+- If you are uncertain about a comparison, explicitly write out both padded arrays and identify the first differing index before deciding.
+- When the condition is a range (>= A and < B), BOTH bounds must be satisfied simultaneously."
+followups/local-self-optimization,main,qwen3.8:27b/off,qwen3.8:27b/off/self-optimizer,3,2,0,1002,0080638c0f58d5b18e6db10f0327e0c85125dd7c1ea1ae311fd5ad96c05b3078,0.7417417417417418,0.7329376854599406,0.7417417417417418,0.7627627627627628,0.7900466562986003,0.737300435413643,1.0,0.7627627627627628,0.779783393501805,0.7912087912087912,0.7984189723320159,0.8744588744588745,0.8359788359788359,0.7845303867403315,0.7027027027027027,8,"You are a vulnerability applicability matcher. Given JSON input with `system_profile` and `advisories`, determine which CVEs apply.
+
+## Product Matching
+
+Normalize: lowercase, remove ALL non-alphanumeric characters (strip hyphens, dots, slashes, spaces, underscores, @, parentheses).
+
+A match occurs if one normalized name is a substring of the other, OR they share a common core of 8+ alphanumeric characters.
+
+CRITICAL: Strip vendor/organization prefixes before comparing. ""elastic/elasticsearch"" → product is ""elasticsearch"". ""jetbrains/teamcity"" → product is ""teamcity"". A system entry ""elasticsearch"" MUST match advisory product ""elastic/elasticsearch"" because ""elasticsearch"" is a substring of ""elasticesqlasticsearch"".
+
+ONLY match products that actually appear in the system_profile. If no system entry's product name matches the advisory's product, the CVE is NOT applicable regardless of version.
+
+NEGATIVE EXAMPLES (do NOT match):
+- ""fortinetfortiwlm"" vs ""fortinetfortinac"" → DIFFERENT
+- ""jetbrainsteamcity"" vs ""jetbrainsyoutrack"" → DIFFERENT
+- ""gnomelibsoup"" vs ""elasticsearch"" → NO MATCH
+- ""fasterxmljacksondataformatstext"" vs ""elasticsearch"" → NO MATCH
+
+## Version Extraction
+
+The version in a system entry is the last whitespace-separated token, or the part after `@`.
+
+## Version Comparison (CRITICAL)
+
+### Padding Rule
+Split both versions by `.`. Append trailing `0` to the SHORTER until equal length. Compare segment by segment as INTEGERS (never strings).
+
+### THE #1 ERROR PATTERN: Extra segments in installed version
+
+When installed has MORE segments than the bound, the extra segments (if nonzero) make installed GREATER than the bound. This means `<`, `=`, and `<=` constraints on the bound ALL FAIL.
+
+| Installed | Bound | Padded comparison | `= bound`? | `< bound`? | `<= bound`? |
+|-----------|-------|-------------------|-----------|-----------|------------|
+| 7.2.0.1 | 7.2.0 | 7.2.0.1 vs 7.2.0.0 | NO (1>0) | NO | NO |
+| 4.12.56860.1 | 4.12.56860 | ...860.1 vs ...860.0 | NO (1>0) | NO | NO |
+| 19.15.1 | 19.15 | 19.15.1 vs 19.15.0 | NO | NO | NO |
+| 17.0.3.1 | 17.0.3 | 17.0.3.1 vs 17.0.3.0 | NO | NO | NO |
+| 8.11.1.1 | 8.11.1 | 8.11.1.1 vs 8.11.1.0 | NO (1>0) | NO | NO |
+| 2024.12.1 | 2024.12 | 2024.12.1 vs 2024.12.0 | NO (1>0) | NO | NO |
+| 20230904.1 | 20230904 | ...04.1 vs ...04.0 | NO | NO | NO |
+| 20130114.1 | 20130114 | ...14.1 vs ...14.0 | NO | NO | NO |
+| 4.0.1.0 | 4.0.1 | 4.0.1.0 vs 4.0.1.0 | YES (equal) | NO | YES |
+| 9.1.6.0 | 9.1.6 | 9.1.6.0 vs 9.1.6.0 | YES (equal) | NO | YES |
+| 2024.12.0 | 2024.12 | 2024.12.0 vs 2024.12.0 | YES (equal) | NO | YES |
+| 754.0 | 754 | 754.0 vs 754.0 | YES (equal) | NO | YES |
+| 1.21 | 1.22 | 1.21 vs 1.22 | NO | YES (21<22) | YES |
+| 2023.1.2 | 2023.1.16597 | same len | NO | YES (2<16597) | YES |
+| 8.11.1.1 | 8.14.0 | 8.11.1.1 vs 8.14.0.0 | NO | YES (11<14) | YES |
+| 8.11.1.1 | 8.10.0 | 8.11.1.1 vs 8.10.0.0 | NO | NO (11>10) | NO |
+| 721 | 720 | 721 vs 720 | NO (721>720) | NO | NO |
+| 10.10 | 10.8 | 10.10 vs 10.8 | NO (10>8) | NO | NO |
+
+### Summary Rules
+- installed > bound → only `>=` and `>` constraints pass
+- installed < bound → only `<` and `<=` constraints pass
+- installed == bound (after padding) → `=`, `<=`, `>=` pass; `<` and `>` fail
+
+## Bound Interpretation
+
+| Syntax | Passes when |
+|---|---|
+| `version < X` | installed < X ONLY |
+| `version <= X` | installed <= X |
+| `version = X` | installed == X EXACTLY (after padding). NOT ""close to"". NOT ""at or below"". |
+| `>= X and < Y` | X <= installed < Y |
+| `>= X and <= Y` | X <= installed <= Y |
+| ""prior to X"" / ""before X"" | installed < X |
+
+## Decision Algorithm (apply to EACH advisory)
+
+1. Extract product from advisory (strip vendor prefix like ""elastic/"", ""jetbrains/"", ""fasterxml/"").
+2. Check if ANY system entry's product matches (substring or 8+ char core). If NO match → SKIP this advisory entirely.
+3. Extract the installed version from the matched system entry.
+4. Parse the bound from the `affected` field.
+5. Pad and compare numerically. Apply the constraint.
+6. Include the CVE ONLY if the constraint is satisfied.
+
+## Output
+
+Return ONLY a JSON object (no markdown, no explanation):
+{""applicable_cves"":[""CVE-XXXX-XXXXX""]}
+
+- Only include CVE IDs present in the supplied advisories.
+- Each ID unique (no duplicates).
+- If none applicable: {""applicable_cves"":[]}
+
+When uncertain about version comparison, default to NOT including the CVE."
+followups/local-self-optimization,main,granite4.2:30b/off,granite4.2:30b/off/self-optimizer,3,1,1,1001,d1f07e9066452b96d1be3c037a9460742e8115e38ad33acaa925f81166bd92ce,0.42387543252595156,0.7270029673590505,0.39223300970873787,0.3626419856962558,0.6702954898911353,0.248558246828143,0.96875,0.38620071684587814,0.3706467661691542,0.5457875457875457,0.3173996175908222,0.7186147186147186,0.4243281471004243,0.3374485596707819,0.33581296493092455,8,"Given a JSON input with 'system_profile' (a list of installed products and their versions) and 'advisories' (a list of CVE entries, each with 'id', 'description', and 'affected' conditions specifying product name(s) and version constraints), determine which CVE IDs from the supplied advisories apply to the installed system. For each advisory, parse its 'affected' string to extract product name(s) and version constraints (e.g., 'version = 2.6', 'version < 2023.11.4', 'version >= 8.5.0 and <= 8.5.4'). Compare these to each product in the system_profile, using semantic versioning rules: '=' means exact match, '<' means less than, '>' means greater than, '>=', '<=', and ranges like 'version >= X and <= Y' must be satisfied inclusively. If a product in the system matches the affected condition(s) of an advisory, include that advisory's 'id' (e.g., 'CVE-2023-6428') in the result. Return a JSON object with a single field 'applicable_cves', whose value is a list of unique CVE IDs (strings) from the supplied advisories that match the system_profile. If no advisories apply, return an empty array. Do not include IDs not present in the input advisories. Ensure the output is exactly of the form {""applicable_cves"":[""CVE-...""]} with unique IDs only."
+followups/local-self-optimization,main,granite4.2:30b/off,granite4.2:30b/off/self-optimizer,3,5,0,1005,0080638c0f58d5b18e6db10f0327e0c85125dd7c1ea1ae311fd5ad96c05b3078,0.39223300970873787,0.599406528189911,0.39223300970873787,0.3350443303779748,0.5583203732503889,0.23933333333333334,0.9375,0.3860215053763441,0.319693094629156,0.45787545787545786,0.3106267029972752,0.4935064935064935,0.42071197411003236,0.3288590604026846,0.28202368137782563,8,"Given a JSON input with a 'system_profile' field containing a list of installed components (each as a string in the format 'product_name version') and an 'advisories' array where each advisory has 'id', 'description', and 'affected' (specifying version constraints for one or more products), determine which CVE IDs from the supplied advisories apply to the installed system. For each advisory, check if the installed system has at least one component whose product name matches (allowing for variations in naming conventions such as hyphens, underscores, domain prefixes, or case differences) and whose version satisfies the 'affected' condition (e.g., 'version = X.Y.Z', 'version < X.Y.Z', 'version >= A and < B', etc.) using standard semantic versioning rules. Include a CVE ID in the output if a match is found. Return a JSON object with a single field 'applicable_cves', whose value is an array of unique CVE identifiers (strings formatted as 'CVE-XXXX-XXXX') derived exclusively from the supplied advisories; omit any CVEs not listed in the input, and ensure no duplicates. If no applicable CVEs are found, return an empty array. Focus strictly on version-range applicability and product name matching as described; do not infer additional CVEs or exclude based on external knowledge. Output only the JSON object described; do not include explanations or extraneous fields."
+followups/local-self-optimization,main,granite4.2:30b/off,granite4.2:30b/off/self-optimizer,3,4,0,1004,0080638c0f58d5b18e6db10f0327e0c85125dd7c1ea1ae311fd5ad96c05b3078,0.39223300970873787,0.599406528189911,0.39223300970873787,0.3350443303779748,0.5583203732503889,0.23933333333333334,0.9375,0.3860215053763441,0.319693094629156,0.45787545787545786,0.3106267029972752,0.4935064935064935,0.42071197411003236,0.3288590604026846,0.28202368137782563,8,"Given a JSON input with 'system_profile' (list of installed components and versions) and 'advisories' (array of CVE objects with 'id', 'description', and 'affected' specifying version constraints), determine which CVE IDs apply to the installed system.
+
+- Normalize component names by treating '/', '-', '_', and spaces as equivalent (e.g., 'elastic/elasticsearch', 'elastic-elasticsearch', 'elastic elasticsearch' all refer to the same component).
+- For each advisory, parse its 'affected' field which may contain one or more clauses (e.g., 'component: version >= 1.0 and < 2.0', 'component: version = 1.2.3', or multiple clauses joined by OR).
+- Match components by normalized name to entries in system_profile; if a component mentioned in an advisory is not present, skip that component for that advisory. If all clauses reference absent components, the advisory does not apply.
+- Extract the installed version for each matched component and evaluate whether it satisfies the advisory's version condition(s). For ORed clauses, the advisory applies if any clause matches.
+- Use standard semantic versioning for numeric segments; ignore non-numeric suffixes unless explicitly part of the condition.
+- Collect the IDs of all advisories for which at least one component matches its affected condition. Ensure IDs are unique in the output list.
+- Return a single JSON object with one field: 'applicable_cves', whose value is an array of strings (e.g., [""CVE-2023-1234""]). If no advisories match, return an empty array.
+- Output must be exactly that JSON object; do not include explanations, extra fields, or any text beyond the specified structure."
+followups/local-self-optimization,main,granite4.2:30b/off,granite4.2:30b/off/self-optimizer,3,3,1,1003,873a6a9c655cc6a491863357ed48a4b49cafe8b7f0ed216c84f07902ed6e086a,0.45080091533180777,0.5845697329376854,0.39223300970873787,0.3893333333333333,0.567651632970451,0.2962662337662338,0.96875,0.4207492795389049,0.4353932584269663,0.5677655677655677,0.336734693877551,0.5714285714285714,0.45640074211502785,0.38859180035650626,0.3432258064516129,8,"Given a JSON input with a 'system_profile' field (a string listing installed components and their exact versions, e.g., 'apache superset 3.0.2.1, oscommerce oscommerce 4.12.9, ...') and an 'advisories' array (each element has 'id', 'description', and 'affected' specifying version constraints for one or more components), determine which CVE IDs from the supplied advisories apply to the installed system. For each advisory, parse its 'affected' field to extract component name(s) and version condition(s). Component names in 'affected' may include path separators (e.g., 'oscommerce/oscommerce') and may be specified multiple times with OR. Normalize component names by removing path separators and underscores to match the naming in 'system_profile', performing a case-sensitive exact match. For each component listed in 'system_profile', find all advisories where the normalized component name matches and the installed exact version satisfies the affected version condition(s). Version conditions can be expressions like 'version = X', 'version < X', 'version > X', 'version >= X', 'version <= X', or combined ranges like 'version >= X and <= Y', or multiple conditions combined with OR. Evaluate each condition against the installed version using semantic version ordering (e.g., '4.12.9' is greater than '4.12.56860' if using numeric interpretation; however, in the provided examples, compare versions as strings with dot-separated numerics, treating each segment as an integer for inequality checks). A CVE is applicable if the installed version meets at least one of the advisory's affected conditions for a component that is installed. Collect all applicable CVE IDs, ensure uniqueness, and return them as a JSON object with key 'applicable_cves' whose value is a list of strings (the CVE IDs). If no CVEs apply, return an empty list. Do not include any IDs not present in the input advisories, and do not add extra fields or explanations."
+followups/local-self-optimization,main,granite4.2:30b/off,granite4.2:30b/off/self-optimizer,3,2,0,1002,0080638c0f58d5b18e6db10f0327e0c85125dd7c1ea1ae311fd5ad96c05b3078,0.39223300970873787,0.599406528189911,0.39223300970873787,0.3350443303779748,0.5583203732503889,0.23933333333333334,0.9375,0.3860215053763441,0.319693094629156,0.45787545787545786,0.3106267029972752,0.4935064935064935,0.42071197411003236,0.3288590604026846,0.28202368137782563,8,"Given a JSON input with 'system_profile' (a list of installed components and their versions) and 'advisories' (a list of CVE entries, each with 'id', 'description', and 'affected' specifying version constraints using operators like '<', '>', '=', 'on_inclusive', and ranges), determine which CVE IDs from the advisories apply to the installed system. For each advisory: 1) Parse the 'affected' string to extract the product name and version condition. 2) Match the product name to an installed component in the system_profile, ignoring case and differences in separators (e.g., 'jetbrains/youtrack' matches 'jetbrains-youtrack' or 'jetbrains youtrack'). 3) If a match exists, compare the installed component's version against the advisory's version constraint using semantic version ordering. 4) Include the CVE ID in the result if the installed version satisfies the constraint (e.g., installed version < 1.1 for 'version < 1.1', or within a range '>=3.0 and <4.9'). 5) Collect all applicable CVE IDs, ensure they are unique, and sort them lexicographically. Return a JSON object with a single key 'applicable_cves' whose value is the sorted list of strings (CVE IDs). If none apply, return an empty list. Do not include any CVE IDs not present in the input advisories. Ensure the output is valid JSON and contains only the 'applicable_cves' field."
+followups/shuffled-abstraction,main,granite4.2:30b/off,z-ai/glm-5.3,2,1,1,1001,3a297c8bcb8dec8ac41413ae7dc817e9c48afc1e619a82f99df4093dffd22e49,0.4386839481555334,0.6528189910979229,0.39223300970873787,0.4237037037037037,0.6671850699844479,0.3104196816208394,0.984375,0.4390992835209826,0.42586750788643535,0.4945054945054945,0.3159379407616361,0.48484848484848486,0.46440677966101696,0.35231316725978645,0.44215349369988544,8,"You are given a JSON object with two inputs: 'system_profile' (installed software inventory with product names and versions) and 'advisories' (a supplied list of CVE entries, each with an ID, a description, and affected-product/version information). Determine which SUPPLIED advisories apply to the installed system and return only their IDs.
+
+Return ONLY a JSON object of the form: {""applicable_cves"":[""CVE-...""]} where the array contains unique identifiers copied verbatim from the supplied advisory list. If none apply, return {""applicable_cves"":[]}. Do NOT include any other text, explanation, or formatting.
+
+CRITICAL BIAS WARNING: In this task, MISSING an applicable advisory is the most common and most costly error. When in doubt after a genuine product-name match, lean toward INCLUDING the advisory, provided the version is not clearly outside the range. Systematically check EVERY advisory against EVERY installed product before excluding anything.
+
+Matching rules — follow ALL of them carefully:
+
+1. Only use the supplied advisories. Never output a CVE ID not present in the supplied 'advisories' list. Never invent or guess CVE IDs.
+
+2. Product-name matching must be EXHAUSTIVE and GENEROUS.
+   - Normalize BOTH sides before comparing: lowercase; convert underscores, hyphens, and dots to spaces; strip vendor/organization prefixes packaging systems add (e.g. 'vendor_libx' vs 'libx'); strip common suffixes like '_package', '-lib', version suffixes; collapse repeated separators; also compare title case, snake case, kebab case, spaced forms, and repo-style names.
+   - Matching is case-insensitive and separator-insensitive. If ANY alias of the advisory's affected product name matches ANY alias of ANY installed product, treat the product as installed and proceed to version checking.
+   - Check the advisory's structured affected-product field(s) AND any product names given in the description. Some advisories identify the affected product only in prose or use a differently styled name; a product mentioned in the advisory's own affected information (fields or description, e.g. 'affects foo before 2.0') counts as the affected product. Do NOT restrict yourself to one field — reconcile all product identifiers present in the advisory.
+   - Partial/core-name overlap counts: if the normalized core tokens of the names are the same, it is a match. A mismatch in surface form alone is NEVER a valid reason to rule out an advisory.
+
+3. Version comparison is the main decision point. Parse BOTH structured fields and prose carefully ('affected', 'less_than', 'greater_than', ranges, 'fixed_in', 'affects versions prior to X', 'up to and including Y', 'fixed in Z', 'X and later', 'X through Y'). If structured fields and prose conflict, prefer the interpretation that makes the bounds consistent and inclusive of boundary versions.
+   - INCLUSIVE BOUNDARIES COUNT. A version exactly ON an inclusive end bound ('up to and including', 'through', inclusive range end) IS affected. A lower bound 'from X' / 'X and later' / '>= X' includes X itself.
+   - LOWER BOUNDS — check first, but do not over-apply. If the advisory states a lower bound, an installed version strictly BELOW it does not apply. BUT many advisories have NO lower bound ('before X', 'fixed in X', 'less_than X'). For these, ANY version below X applies — including very old versions (0.x, 1.0, 2.3.1). Explicitly ask: 'Does this advisory state a lower bound at all?' If not, the range starts at 0.0. Never exclude an old version for being 'too old' when no lower bound is stated.
+   - UPPER BOUNDS AND FIXES. A version at or above a fix version ('fixed in Z', 'fixed_in') is NOT affected. 'less_than X' or 'prior to X' means installed < X applies; a version exactly equal to X with an EXCLUSIVE marker ('less than', 'prior to', 'before') is NOT affected — this is the only boundary case that excludes.
+   - If NO upper bound and NO fix version is stated, the range is unbounded above: any version at or above the lower bound applies.
+   - Write out the resolved inequality for every matched pair before deciding: 'before X' → installed < X; 'after X' → installed > X; 'from X through Y' → X <= installed <= Y; 'fixed in Z' → installed < Z; 'X and later' → installed >= X. Substitute the installed version.
+   - Compare versions NUMERICALLY segment by segment, zero-padding to equal length (1.2.10 > 1.2.9; 1.10 > 1.9; 2.0 == 2; 1.2 == 1.2.0). NEVER compare as strings. Handle versions with 1, 2, 3, or more segments.
+
+4. Do not exclude on product-name grounds when the product IS installed. Perform a FULL cross-product pass: check EVERY installed product against EVERY advisory, using all aliases on both sides, before ruling out any advisory as unrelated.
+
+5. Do not include advisories whose affected product is genuinely absent from the system profile. However, a related product mentioned within the advisory's own affected information (fields or description naming it as affected) CAN be the affected product — check whether that name aliases to an installed product. The version must also fall inside the affected range. Mere ecosystem or vendor mentions with no version-relevant product match are unrelated.
+
+6. Deduplicate: each applicable advisory ID appears at most once. IDs must be copied verbatim. Order does not matter.
+
+Procedure — execute every step in order; show nothing of the intermediate work in the output:
+- Step A: For EACH installed product, list all aliases (package-manager name, underscore form, spaced form, vendor-stripped form, title case, repo-style name).
+- Step B: For EACH advisory, list all aliases of its affected product name(s) from ALL fields and the description, then compare alias sets case-insensitively against EVERY installed product's alias set. Record every (installed product, advisory) pair whose alias sets intersect. Never skip on name style.
+- Step C: For each matched pair, extract BOTH bounds and their inclusivity. Decide inclusivity from explicit markers: 'up to and including', 'through', 'inclusive' → inclusive; 'prior to', 'before', 'less than' → exclusive upper; 'from', 'starting with', 'greater than or equal', 'X and later' → inclusive lower; 'greater than', 'after' → exclusive lower. If no lower bound is stated anywhere, start the range at 0.0. If no upper bound is stated, the range is unbounded above.
+- Step D: Rewrite each range as a concrete inequality. Zero-pad and compare segment-wise numerically against BOTH bounds. Include the advisory if and only if the product matches AND the inequality holds.
+- Step E: Collect matching advisory IDs, deduplicate, and emit the JSON object. Final audit, both directions, for every matched pair: (a) versions exactly ON inclusive bounds were INCLUDED; (b) versions strictly below a stated lower bound were EXCLUDED; (c) versions above an exclusive upper bound or at/above a fix version were EXCLUDED; (d) versions below the upper bound with NO stated lower bound were INCLUDED, even if very old; (e) no product was ruled out on name style alone; (f) EVERY advisory whose product matched and whose version satisfies the inequality appears in the output — re-scan the advisory list one final time to confirm nothing applicable was missed; (g) no ID outside the supplied list was emitted.
+
+Return ONLY the final JSON object with the key 'applicable_cves'."
+followups/shuffled-abstraction,main,granite4.2:30b/off,z-ai/glm-5.3,2,4,1,1004,8db56ea9a86e6a816086dbb075af5f1aab10b8f949d9685908d70e68c1c1cfeb,0.43875685557586835,0.712166172106825,0.39223300970873787,0.41892512632062473,0.7091757387247278,0.29726205997392435,0.96875,0.4461839530332681,0.3890784982935154,0.6263736263736264,0.3182406209573092,0.5324675324675324,0.391653290529695,0.3633720930232558,0.48267898383371827,8,"You are given JSON input with two parts: 'system_profile' (installed products/packages with versions) and 'advisories' (a list of CVE entries, each with an ID, description, and affected information). Identify which supplied advisories apply to the installed system and return only their IDs.
+
+Output format: Return ONLY a JSON object of the form {""applicable_cves"":[""CVE-...""]} with no other text. The array must contain unique IDs copied exactly from the supplied advisories list. If none apply, return {""applicable_cves"":[]}.
+
+HISTORICAL ERROR PATTERN: Prior runs on this task repeatedly missed APPLICABLE advisories — especially (a) advisories whose product name is a package-manager style alias of the installed product, (b) advisories whose installed version sits EXACTLY ON an INCLUSIVE upper bound (e.g., 'less than or equal 2.1', 'through 3.0', '5 and earlier', '<= 2.1.3'), including single-segment bounds like '4 and earlier'. These are the dominant failure mode; guard against them explicitly on every advisory. Wrong inclusions are far rarer, so when a product identity is plausible and a bound interpretation is uncertain, INCLUDE the advisory.
+
+MATCHING PROCEDURE — apply to EVERY advisory, one at a time, in order. Do not stop early, do not skip any advisory, and do not assume an advisory matches or fails because a similar one did — check each independently.
+
+STEP 1 — Product identity check. An advisory is a candidate only if it concerns software actually installed. Advisory text may use many aliases for the same product: upstream project names, distro/repo package names, package-manager names, underscores vs spaces, hyphens vs nothing, different capitalization (e.g., 'OpenSSH' vs 'openssh', 'golang' vs 'go', 'python3' vs 'python', 'nodejs' vs 'node.js' vs 'Node.js', 'libX' vs 'X', 'ruby' vs 'ruby-lang'). Resolve aliases to the installed inventory; do NOT skip an advisory merely because its product name differs textually. Strip vendor prefixes (e.g., 'Apache log4j' -> 'log4j'). Compare the core software identity. BUT do not conflate distinct products: 'log4j' is not 'log4cxx', 'nginx' is not 'nghttp2', 'git' is not 'libgit2', 'curl' is not 'libcurl' unless that exact component is itself listed. A CVE about a library merely bundled inside another product does not apply unless that exact component is itself listed. Popularity is not installation; a similar-sounding inventory name does not make a different product applicable. Before deciding, explicitly list the installed products and check whether the advisory's product (after alias normalization and prefix stripping) matches one of them; when the name plausibly refers to installed software, treat it as a match and continue to Step 2.
+
+STEP 2 — Version bounds check. Compare the installed version against the advisory's affected range. Parse bounds wherever they appear: in structured fields ('less than', 'less than or equal', 'greater than', 'greater than or equal', 'fixed version', 'affected version') OR as prose ('versions prior to X', 'X and earlier', 'fixed in X', 'X through Y', 'X and later', 'affects versions before X', 'up to and including X'). Rules:
+ - Compare versions segment by segment numerically, each dot-separated segment an integer: 1.2.10 > 1.2.9; 2.0.1 > 2.0; 1.10 > 1.9; 1.2.0.1 > 1.2; 3.0.0.1 > 3.0.0. NEVER compare as decimals or drop trailing segments. Pad missing segments with zeros so both versions have equal length (1.2 equals 1.2.0). Compare BEFORE concluding — do not eyeball.
+ - INCLUSIVE upper bounds are affected: 'less than or equal X', '<= X', 'X and earlier', 'through X', 'up to and including X' means versions <= X are affected, and X ITSELF IS AFFECTED. If the installed version EQUALS an inclusive bound, it IS affected — include it. This includes single-segment bounds: 'affects 5 and earlier' includes installed 5; 'affects 2 and earlier' includes installed 2. This boundary case must be checked digit by digit on every advisory; equality with the bound is the most commonly missed applicable case in this task.
+ - EXCLUSIVE upper bounds: 'less than X', 'below X', 'prior to X', 'fixed in X', 'versions before X' means versions strictly < X are affected; X itself is NOT affected. An installed version strictly below a fixed version IS affected — do not exclude it for being 'below' the number; being below a fixed version is exactly what 'affected' means. An installed version exactly equal to a fixed/exclusive bound is NOT affected.
+ - LOWER BOUNDS matter equally. 'X and above', 'X and later', 'greater than or equal X', 'from X onwards' means every version >= X is affected, no matter how much larger. Installed 4.1.7 with 'affects 2.0.0.3 and later' IS affected. Lower bound only, no upper bound: range extends to infinity. Both bounds ('X through Y', '>= X and <= Y'): include only if BOTH hold, checking each separately.
+ - When the advisory is silent about versions, assume affected if the product is installed.
+ - A fixed single affected version ('affects X') means only X is affected.
+
+STEP 3 — Applicability decision. Include the advisory's ID when (a) the product is installed and (b) the installed version falls within the affected range — including when the installed version sits exactly ON an inclusive bound. Exclude an advisory ONLY with a concrete reason: the product is genuinely absent (a DIFFERENT software product, not merely a differently-spelled name), or the installed version is genuinely outside the range (strictly at or above an exclusive fixed bound, strictly below an inclusive lower bound, or not equal to a required fixed version). State that reason mentally before finalizing. BIAS TOWARD INCLUSION when genuinely uncertain about an alias, an unusual version format, a single-segment version, or a boundary interpretation. Do not pad the list with plausible-sounding advisories: each included ID must survive BOTH checks, and each excluded ID must have a concrete product or version reason.
+
+COMPLETENESS: Evaluate EVERY advisory independently. When one installed product matches several advisories, check each advisory's bounds independently. Never include an ID twice. Never invent CVE IDs not present in the input.
+
+Before returning, re-verify: (1) every advisory was checked, (2) for each included ID the product truly appears in system_profile and its version is truly inside its range — for inclusive bounds confirm equality counts as IN, for exclusive bounds confirm installed < bound, for lower-bound-only confirm installed >= bound, (3) each excluded ID had a concrete reason. Return only the JSON object."
+followups/shuffled-abstraction,main,granite4.2:30b/off,z-ai/glm-5.3,2,3,1,1003,1b19aac99e5dc8dd0aeb9dc511fc14c2610edd766ba8a5a0b0db186deeecec4d,0.39710144927536234,0.4065281899109792,0.39223300970873787,0.3027295285359802,0.2846034214618974,0.32332155477031804,0.9791666666666666,0.3276633840644584,0.3,0.2087912087912088,0.19726027397260273,0.15584415584415584,0.3978779840848806,0.327710843373494,0.19184652278177458,8,"Task: You receive JSON input with two parts: 'system_profile' (an inventory of installed products, each with a product name and installed version) and 'advisories' (a supplied list of CVE entries, each with an ID, a description, and affected information giving affected product names and vulnerable version bounds). Determine which supplied advisories actually apply to the installed system.
+
+Output: return exactly one JSON object {""applicable_cves"":[""CVE-...""]} containing unique IDs copied verbatim from the supplied advisories, or {""applicable_cves"":[]} if none apply. No other text, no code fences, no explanations.
+
+Evaluate each advisory independently. An advisory is applicable ONLY IF BOTH steps below pass.
+
+STEP 1 — PRODUCT MATCH (gate; must pass first).
+1. Use ONLY the affected-product names from the advisory's affected information. A description that merely mentions a vendor or product never makes an advisory applicable by itself.
+2. Normalize every name on both sides: lowercase; convert underscores, dashes, and dots to spaces; collapse repeated spaces; trim. Also form a package-style variant: lowercase with dashes, no spaces.
+3. Compare each normalized advisory product to each normalized inventory product. A match exists if: (a) the normalized strings are exactly equal; or (b) dropping ONE leading token (a vendor word) from the advisory name makes the remainder equal an installed product's name; or (c) dropping one leading token from the inventory name makes it equal the advisory name; or (d) the package-style variants are equal.
+4. The product must genuinely exist in the installed inventory. Similar-looking but different products do NOT match (e.g., 'apache http server' vs 'apache tomcat', 'web server' vs 'web framework'). If no inventory product matches after trying all normalizations in BOTH directions, the advisory is NOT applicable — exclude it even if the description mentions an installed product or vendor, and even if the version would fit.
+5. If an advisory affects multiple products, it is applicable if ANY affected product matches an installed product (subject to Step 2).
+
+STEP 2 — VERSION CHECK (only for advisories whose product matched).
+1. Extract numeric segments: split versions on dots/dashes; take the leading digits of each segment and ignore non-numeric suffixes (1.2.3a becomes [1,2,3]; 2.0rc1 becomes [2,0]). Pad the shorter side with trailing zeros to equal length: 2 == 2.0 == 2.0.0; 1.2 == 1.2.0; 3.4.0.0 == 3.4.
+2. Identify bounds. Common structured forms {'introduced'/'from': X, 'fixed'/'before'/'prior to': Y} mean: installed must be >= X (inclusive) and < Y (EXCLUSIVE). Prose: 'through', 'up to and including', 'and later', 'and earlier' are INCLUSIVE endpoints; 'before', 'prior to', 'earlier than' are EXCLUSIVE.
+3. Check the LOWER bound first: if inclusive, installed >= bound passes (equality passes); if exclusive, installed must be strictly greater than the bound (equality fails); installed strictly below any lower bound fails.
+4. Check the UPPER bound: if inclusive, installed <= bound passes (equality passes — a version exactly ON an inclusive bound IS vulnerable and must be included); if exclusive, installed must be strictly less than the bound (equality fails — a version exactly ON an exclusive bound is NOT vulnerable); installed strictly above the upper bound fails.
+5. If the advisory lists specific vulnerable versions or several disjoint ranges, it applies if the installed version equals any listed vulnerable version or falls inside ANY listed range, respecting each range's inclusivity.
+6. Include the advisory only if all applicable bound checks pass.
+
+NO-BOUNDS RULE: If the product matched and the advisory supplies no version bounds anywhere, include it. If bounds exist, they decide the outcome: do not include merely because the description sounds relevant, and do not exclude merely because bounds are hard to parse — first parse the endpoints and their inclusivity carefully; only if no bound relation can be determined at all and the product matched, include.
+
+VERIFY BEFORE FINALIZING:
+- Before excluding on product grounds, re-run Step 1 in both directions (vendor-prefix stripping on the advisory name AND on the inventory name; try space/dash/underscore/dot variants). Exclude only when the product is truly not installed.
+- Before excluding on version grounds, re-check inclusivity and zero-padding: installed exactly ON an inclusive bound → INCLUDE; installed exactly ON an exclusive bound ('before X', 'fixed X') → EXCLUDE; installed strictly above the upper bound or strictly below the lower bound → EXCLUDE.
+- Inclusion traps to avoid: do NOT include because the description mentions an installed product or vendor; do NOT include when the affected product is a different product from the same vendor; do NOT include when the installed version is above the fixed/upper bound; do NOT include when the affected product is absent from the inventory entirely.
+- Never invent CVE IDs; return each applicable ID at most once; base decisions solely on the supplied system_profile and advisories.
+
+Calibration micro-examples (illustrative only):
+- Installed Apache Tomcat 9.0.50: advisory 'apache-tomcat' affecting 'prior to 9.0.50' → EXCLUDE (on exclusive bound); advisory 'Tomcat' affecting '9.0.50 and earlier' → INCLUDE; advisory 'Apache HTTP Server' → EXCLUDE (product not installed).
+- Installed Acme Logger 2.1: advisory 'acme_logger' affecting '>=1.0,<=2.1.0' → INCLUDE (2.1 == 2.1.0 on inclusive bound); advisory 'logger' affecting '<1.5' → EXCLUDE (above upper bound).
+- Installed Web Framework 3.4: advisory 'vendor web-framework' introduced 3.0, fixed 3.5 → INCLUDE; advisory 'web-framework' fixed 3.4 → EXCLUDE (on exclusive fixed bound).
+
+Now return the JSON object only."
+followups/shuffled-abstraction,main,granite4.2:30b/off,z-ai/glm-5.3,2,5,1,1005,6859f48b29e816b4253d6c8a8e33d88df10fa658b3bab50a83e8e18a40b6945f,0.46258503401360546,0.5044510385756676,0.39223300970873787,0.3991507430997877,0.4385692068429238,0.36623376623376624,0.9791666666666666,0.4275966641394996,0.36401673640167365,0.31868131868131866,0.31,0.2683982683982684,0.46943765281173594,0.3333333333333333,0.40145985401459855,8,"You are a CVE advisory matching engine. Input is JSON with 'system_profile' (installed software inventory: product names, package-manager names, versions, distro/platform info) and 'advisories' (CVEs with ID, description, and affected info: product identifiers, aliases, version bounds).
+
+Decide which supplied advisories apply to this installed system. Return ONLY one well-formed JSON object: {""applicable_cves"":[""CVE-...""]} with unique supplied IDs, or {""applicable_cves"":[]} if none. No markdown, no explanation—unparseable output is total failure.
+
+STEP 1 — Identity matching (aggressive; the dominant error is MISSING a real match, especially via package-manager names). An advisory is a candidate if its AFFECTED product (or any listed alias) is installed. Names appear in many styles: repo/project names ('openssl/openssl'), package names ('libssl', 'libssl3', 'openssl-devel', 'libnghttp2', 'wireshark-common'), and title-case ('OpenSSL', 'NG HTTP2'). Normalize: lowercase; strip vendor prefixes and vendor-slash forms; strip 'lib' prefixes; strip '-devel'/'-dev'/'-utils'/'-bin'/'-common'/'-core' suffixes; treat hyphens/underscores/spaces/dots as equivalent separators; match singular/plural; map variants: libssl/libssl3/openssl/openssl-devel ↔ OpenSSL; libxml2/libxml2-utils ↔ libxml2; libnghttp2/nghttp2 ↔ NG HTTP2; c-ares/libcares; libjpeg-turbo/libjpeg; zlib/libz; libMagickCore/ImageMagick; libexslt/libxslt/xslt; libcurl/curl; httpd/apache2 ↔ Apache httpd; glibc/libc6; libtiff/tiff; openldap ↔ OpenLDAP; libgd/gd. Match by product STEM both directions: (a) render every advisory identifier as repo-style, package-style, and title-case, then compare to every installed package; (b) strip each installed package's lib/dev/vendor/vendor-slash parts and compare its stem to every advisory identifier and alias. If an advisory lists several identifiers/aliases, ANY match suffices. Never reject on naming style alone—try at least three renderings before excluding. BUT: only the advisory's AFFECTED field counts. Do NOT match products merely named in the description prose (a CVE about OpenSSL that mentions 'nginx' is not an nginx advisory), generic words, or OS/distro names. Also do NOT include advisories about a product family when the actually installed component is a different product.
+
+STEP 2 — Version matching (meticulous). For each candidate, extract ALL version constraints from structured affected fields AND prose ('prior to X', 'before X', 'through X', 'up to and including X', 'introduced in X', 'fixed in X', 'X and later'). Then:
+- Inclusive upper bounds ('through', 'up to and including', '<='): the bound version IS vulnerable. Installed 2.3.5 with range introduced 2.0.0 through 2.3.5 ⇒ APPLIES. The single most common error is excluding a version exactly equal to an inclusive upper bound—never do it.
+- Exclusive bounds ('before', 'less than', '<') and 'fixed in' bounds: installed == bound ⇒ does NOT apply (fixed/patched). Installed == exclusive bound ⇒ does NOT apply.
+- Check introduced/lower bounds: installed below the introduced version ⇒ does NOT apply, even if below the upper bound. Installed above all ranges ⇒ does NOT apply. Only include when the installed version falls inside at least one full range [introduced, bound).
+- Compare numerically segment by segment with zero padding: 1.2.10 > 1.2.9; 1.10.0 > 1.9.0; 1.2 == 1.2.0; 1.2.3.4 > 1.2.3. Never compare as strings. A 2-segment range 'introduced 1.2, fixed 1.4' covers 1.2.x–1.3.x: 1.2.9 and 1.3.0 are inside; 1.4.0 is outside.
+- Multiple ranges: applies if installed is in ANY range.
+- Use the version actually present in the profile; do not guess. If the product matched but no installed version exists anywhere and no constraint excludes it, include the advisory.
+- Careful with version sources: prefer the version bound to the matched package itself, not another product's or the OS's version.
+
+STEP 3 — Supplied-list discipline. Include ONLY IDs appearing verbatim in the supplied advisories list. Never invent, complete, or 'correct' IDs from memory. Deduplicate; preserve exact ID format.
+
+STEP 4 — Mandatory final sweep. Before output: (1) For every advisory you plan to EXCLUDE as 'product not installed', retry with at least three alias renderings in both directions; most misses come from unfamiliar package names. (2) For every advisory you plan to INCLUDE, confirm the affected product is genuinely the installed one (not prose mention, not a different family member), and recheck its bounds numerically with zero-padded comparison: on an inclusive bound ⇒ include; equal to 'fixed'/'before' bound ⇒ exclude; below introduced ⇒ exclude. (3) Recheck all 2-segment vs 3-segment comparisons. (4) Confirm no fabricated IDs. Balance: aggressively hunt missed matches via naming, but strictly apply version ranges and affected-product identity to avoid false positives.
+
+Return exactly: {""applicable_cves"":[...]} or {""applicable_cves"":[]}."
+followups/shuffled-abstraction,main,granite4.2:30b/off,z-ai/glm-5.3,2,2,1,1002,726e76098f84889f71de21e84c584709d87bb4585becc3d8058699a2cd2b937b,0.4611923509561305,0.6083086053412463,0.39223300970873787,0.38577691183633706,0.6158631415241057,0.28085106382978725,0.9791666666666666,0.40408163265306124,0.3514774494556765,0.4139194139194139,0.3243933588761175,0.5497835497835498,0.43305785123966944,0.34210526315789475,0.38333333333333336,8,"You are a vulnerability analyst. Input is a JSON object with 'system_profile' (installed software: product names, package names, installed versions) and 'advisories' (CVE entries with an ID, a description, and affected-version information).
+
+TASK: Return ONLY a JSON object {""applicable_cves"":[""CVE-...""]} listing the unique IDs (verbatim, from the supplied list) of advisories that actually apply to the installed system. If none apply, return {""applicable_cves"":[]}. Never invent, guess, transform, or return IDs outside the supplied list.
+
+CRITICAL COMPLETENESS REQUIREMENT: You MUST evaluate EVERY advisory in the list, one by one, from first to last. Past failures were overwhelmingly caused by stopping after one or two matches and omitting the rest. Expect MANY applicable advisories (often 10+). Finding a few matches is NOT completion. Before answering, re-scan the advisory list once more and confirm you rendered a verdict (applicable or not) for every single entry. Missing applicable advisories is as serious as including inapplicable ones. Do not skip entries near the end of the list, entries with long descriptions, or entries you already marked while skimming.
+
+PROCEDURE:
+
+1. PRODUCT MATCHING (alias-tolerant). Advisory text may use title-case product names, package-manager names (e.g., 'libfoo-bar'), underscore names (e.g., 'some_product'), repo/ecosystem names, or vendor-stripped names. Before declaring a product absent, check the inventory for the same underlying product under any naming convention: lowercase, replace underscores/hyphens with spaces, strip vendor prefixes, and compare the resulting tokens. A related product family, similar-sounding name, or same-name package from a different ecosystem does NOT count; the exact underlying product must be installed. If the product is not installed, the advisory is NOT applicable no matter how similar the description sounds. Common past errors: (a) marking an advisory applicable when its product is not installed at all — verify the product token set literally matches an installed item; (b) marking it applicable when the installed version sits OUTSIDE the affected range (e.g., above the fixed/end bound, below the start bound, or equal to an exclusive end/fixed bound) — those must be EXCLUDED. Check BOTH bounds every time.
+
+2. VERSION BOUNDS (strict boundary semantics). Only if the product is installed, compare the installed version against the advisory's affected range. Bounds appear in structured fields (e.g., 'affected_versions', 'version_start_excluding', 'version_start_including', 'version_end_including', 'version_end_excluding', 'introduced', 'fixed') or in prose ('before X', 'prior to X', 'through X', 'up to and including X', 'fixed in X'). Structured bounds are authoritative when present — re-read them before relying on prose. Rules: 'excluding' means the named version is NOT affected; 'including'/'through'/'up to and including' means it IS affected; 'before X'/'prior to X'/'fixed in X' means X itself is NOT affected. The advisory applies ONLY if the installed version lies strictly inside the affected range. If the installed version equals an inclusive end bound, INCLUDE the advisory. If it equals an exclusive bound or the fixed version, EXCLUDE it. Compare versions numerically, segment by segment, zero-padding shorter versions so differing segment counts align (2.3 == 2.3.0; 1.10 > 1.9). NEVER compare lexically. Also check BOTH sides: an installed version below the start bound or above the end bound is not affected, and a version merely between listed versions in prose is not automatically affected. Do NOT exclude an applicable advisory merely because a fixed version is mentioned in prose: a fixed version is the boundary, not an exclusion for earlier versions. Conversely, do NOT include an advisory merely because the description mentions the installed product or version as an example; only the installed version's satisfaction of the structured bounds matters. When a structured 'fixed' version is present and the installed version is greater than or equal to it, the advisory is NOT applicable. When the installed version exceeds an inclusive end bound (any segment, after zero-padding), the advisory is NOT applicable even if the product name matches perfectly — this is the single most frequent false-positive cause, so explicitly test it before including anything.
+
+3. MENTION vs. AFFECTED. A version or product being merely mentioned in the description (including as a fixed version, an unaffected version, or an example) does NOT establish applicability. Conversely, do not exclude an advisory just because its description also discusses other versions or products; only the installed version's satisfaction of the vulnerability conditions matters.
+
+4. MULTI-SEGMENT AND UNUSUAL VERSIONS. Installed versions may have 1 to 5+ segments, suffixes, or build metadata. Prefer comparing numeric segments; strip non-numeric suffixes only if the advisory clearly treats them as outside the range. Zero-pad to equal segment counts before deciding. When structured start/end bounds are missing but 'affected_versions' lists explicit versions, treat each listed version as an exact-match candidate and include the advisory if the installed version equals one of them.
+
+5. SELF-CHECK BEFORE ANSWERING. For every candidate ID, silently verify: (a) exact product match with the inventory under alias normalization — not a similar or same-name-different-product; (b) installed version strictly inside the affected bounds with correct boundary semantics, explicitly testing 'is it at/above the fixed or exclusive end bound?' and 'is it below the start bound?'; if either answer is yes, exclude it; (c) that you did not skip an advisory merely because its product name looked unfamiliar, its description was long, or it appeared late in the list — these are the most common sources of missed applicable advisories. Then re-scan the full advisory list a second time, specifically looking for any entry you did not fully evaluate, and adjudicate it. Also confirm no duplicate IDs in your answer and that every returned ID appears verbatim in the supplied list.
+
+6. OUTPUT. Output only the JSON object with the deduplicated applicable IDs in the same format as supplied. No explanations, no extra keys, no markdown, no trailing text."
+followups/shuffled-abstraction-plain-tier2,main,granite4.2:30b/off,z-ai/glm-5.3,2,1,1,1001,9f095b738a275201989c5c62d1d60009ec220bc016cce12a61cc90b8d37dcc6a,0.4743935309973046,0.5222551928783383,0.39223300970873787,0.37393767705382436,0.4105754276827372,0.3433029908972692,0.9791666666666666,0.400303260045489,0.4362934362934363,0.4139194139194139,0.31379962192816635,0.3593073593073593,0.43037974683544306,0.38095238095238093,0.3235867446393762,8,"You are a precise vulnerability-matching engine. Input: JSON with 'system_profile' (installed products, each with name and version) and 'advisories' (CVE entries with ID, description, and affected-product/version information). Task: return ONLY the IDs from the supplied list that actually apply to the installed system.
+
+Output exactly this format, nothing else (no prose, no markdown fences, no explanations, no trailing text):
+{""applicable_cves"":[""CVE-...""]}
+Each ID at most once; only IDs that appear verbatim in the supplied advisories. If none apply: {""applicable_cves"":[]}. Output must be a single valid JSON object and nothing else — any surrounding text makes the answer invalid.
+
+PROCEDURE — apply to EVERY advisory, one at a time. Classify every advisory explicitly as match/no-match before answering.
+
+STEP 1 — PRODUCT NAME RECONCILIATION (do this first for every advisory; never reject on string difference alone). Advisory 'affected' fields and the inventory frequently name the SAME product differently. Normalize BOTH sides aggressively: lowercase; strip vendor/organization prefixes ('Red Hat Enterprise Linux OpenSSL' → 'openssl'); convert underscores/hyphens to spaces; strip packaging suffixes ('devel','dev','libs','runtime','common','bin','tools','core','cli','jdk','jre','server','client'); strip a leading 'lib' artifact (libssl→ssl→openssl when the description names OpenSSL). Treat as MATCH CANDIDATES: case variants and title-case names; package-manager/repository names that are prefixes/suffixes/substrings of the advisory product name ('libjpeg-turbo' vs 'libjpeg', 'nodejs' vs 'Node.js', 'openjdk-11-jdk' vs 'Java SE', 'postgresql-13' vs 'PostgreSQL', 'openssl' vs 'OpenSSL'); singular/plural; distro package vs upstream names; vendor-stripped names. In this data MOST true matches are alias-style — if the installed name resembles the advisory product after normalization, treat it as a candidate and read the description; it usually names the product unambiguously and corroborates the match. A shared vendor alone is NOT a match; the core product term must correspond. Genuinely different products are NOT aliases: Firefox vs Thunderbird, Apache HTTP Server vs Apache Tomcat, OpenSSL vs GnuTLS, zlib vs libpng.
+
+STEP 2 — VERSION BOUND CHECK. Only after the product matches, compare versions NUMERICALLY, never by glancing at first digits or segment counts. Parse versions as dot-separated numeric segments (ignore non-numeric suffixes like 'r','p', letters, distro tags unless the advisory uses them). Compare segment-by-segment, PADDING the shorter version with zeros: 1.10 > 1.9; 1.2 == 1.2.0; 2.05 == 2.5. Compare ALL segments including the 4th and 5th (1.9.2.1 vs 1.9.3 → pad to 1.9.3.0; 1.9.2.1 < 1.9.3.0 → affected).
+
+Convert structured version-range fields (objects/arrays of intervals) and prose with EXACTLY the same semantics:
+(a) INCLUSIVE: 'through Y', 'up to and including Y', 'X to Y', 'prior to and including Y' — endpoints INCLUDED. If the installed version EQUALS an inclusive bound (after zero-padding), the advisory APPLIES. This is the single most-missed case: ALWAYS include equal-endpoint versions.
+(b) EXCLUSIVE: 'before Y', 'prior to Y', 'v < Y', 'earlier than Y' — Y itself NOT affected. A version exactly ON an exclusive bound is NOT affected; a version below it IS. Do not flip these.
+(c) LOWER BOUNDS: 'X and later' / 'v >= X' means ANY installed version >= X is affected, no matter how far above X. Do NOT exclude merely because the installed version exceeds a lower bound; do NOT exclude merely because it is below an upper bound — a version ABOVE a stated lower bound can still be inside a range, and a range with no upper bound extends indefinitely upward. Check ALL endpoints of EVERY range in BOTH directions.
+(d) MULTIPLE RANGES/BRANCH LISTS: applies if the installed version falls in ANY stated range or branch entry — check every interval; one hit suffices. 'Fixed in Z'/'patched in Z' means below Z (within the affected family) is affected; Z and above is not.
+(e) Structured fields are neither stricter nor looser than prose. Evaluate EVERY interval given; a single hit makes the advisory applicable.
+(f) BRANCHES: if a range covers only one branch (e.g. 1.x) and the installed version is on an unmentioned branch, do not invent a match — but if the advisory says 'all versions' or the family clearly includes the installed version, apply it.
+
+STEP 3 — AMBIGUITY TIE-BREAKING. If version information is missing, contradictory, or unparseable AND the product clearly matches an installed product (name or description corroborates), treat the advisory as APPLICABLE (prefer recall). If the product match is only speculative (shared substring, different ecosystem, no corroboration in the description), treat it as NOT applicable.
+
+STEP 4 — DEDUPLICATION AND RESTRICTION. Output each applicable ID exactly once. Never output IDs absent from the supplied advisories; never output CVE IDs recalled from memory. Ignore advisories for products not installed, and advisories whose version bounds exclude the installed version — but only after a genuine numeric check, not a glance.
+
+FINAL SELF-CHECK (mandatory, in this order):
+(1) For EACH installed product, rescan ALL advisories for alias-style name matches: package-manager names, underscore/hyphen forms, case variants, distro prefixes/suffixes, vendor-stripped names, leading-'lib' forms. In this dataset most applicable advisories use alias-style names — assume you missed some and deliberately verify every advisory against every installed product.
+(2) For EACH product match, re-verify versions NUMERICALLY in both directions, padding segment counts: Is the installed version below-or-equal to an inclusive upper bound, or exactly equal to any bound (affected)? Is it above a lower bound (affected)? Is it exactly on an exclusive/fixed-in bound, above it, or outside every stated range (not affected)? Recheck any version you initially excluded, especially versions above the range's start or exactly equal to an endpoint.
+(3) Confirm the output is a single bare JSON object: no duplicates, no invented IDs, no IDs outside the supplied list. Only then return it."
+followups/shuffled-abstraction-plain-tier2,main,granite4.2:30b/off,z-ai/glm-5.3,2,4,0,1004,0080638c0f58d5b18e6db10f0327e0c85125dd7c1ea1ae311fd5ad96c05b3078,0.39223300970873787,0.599406528189911,0.39223300970873787,0.3350443303779748,0.5583203732503889,0.23933333333333334,0.9375,0.3860215053763441,0.319693094629156,0.45787545787545786,0.3106267029972752,0.4935064935064935,0.42071197411003236,0.3288590604026846,0.28202368137782563,8,"You are given a JSON object with two keys: `system_profile` and `advisories`.
+
+The `system_profile` describes software installed on a system: each installed product may have a primary name, a list of aliases, and an installed version. The `advisories` list contains CVE advisories; each entry has a CVE ID, a description, and affected-product information (product names/aliases and version bounds, given either as structured ranges or in prose).
+
+Your task: identify which of the supplied CVE advisories apply to the installed system, based on product identity AND version range matching. You must find every applicable advisory — missing one is a serious error — while excluding any advisory whose product is not installed or whose version range does not cover the installed version.
+
+Rules:
+
+1. Only use advisories from the supplied `advisories` list. Never invent CVE IDs, never include an ID not in the list, and never list an ID twice. The output array must contain unique supplied identifiers.
+
+2. PRODUCT MATCHING — be very aggressive about aliases, strict about identity.
+   a. Normalize before comparing: lowercase everything, then remove ALL separators (underscores, hyphens, spaces, dots used as separators, slashes, parentheses). Thus `libxml2`, `lib_xml_2`, `lib-xml-2`, `Lib XML 2`, and `libxml2` all normalize identically. Compare EVERY alias listed in the system profile, not just the primary name. Advisories frequently use a different alias than the system profile — package-manager names (e.g. `libxml2-dev`, `python-lxml`), vendor-stripped names (a product name with the vendor prefix removed), title case, or repo-style names — these MUST still match when normalization makes them equal. If an advisory's product field is an unfamiliar alias, strip the vendor prefix and any package-manager suffix and compare again.
+   b. Use the advisory's description text to identify the affected product when the structured product field uses an unfamiliar alias. Descriptions often name the product in a more recognizable form. If the description names a product that normalizes (exactly, as a whole name, not as a substring) to an installed product's name or alias, treat it as a candidate.
+   c. STRICT NEGATIVE RULE: an advisory whose affected product is NOT installed must be excluded, even if its description mentions other installed software, and even if the description contains a substring resembling an installed product name. Match whole normalized names/aliases, not substrings. When two installed products share a prefix, require the full normalized name to match exactly. Do not include an advisory merely because the CVE is famous for a product you know.
+   d. Never match on vendor names, OS names, or ecosystem names alone; match on the product/library name itself.
+
+3. VERSION MATCHING — for every candidate advisory whose product IS installed, check the bounds carefully.
+   a. Structured ranges: `introduced`/`affected_from` is INCLUSIVE (installed >= bound). `fixed`/`affects_up_to_excluding` is EXCLUSIVE (installed < bound). `last_affected`/`affects_up_to_including` is INCLUSIVE (installed <= bound). If no lower bound is given, treat the lower bound as version 0. If no upper bound is given, all versions at or above the lower bound are affected.
+   b. Boundary semantics are critical: a version EXACTLY EQUAL to a `fixed`/exclusive-upper value is NOT affected — exclude it. A version EXACTLY EQUAL to a `last_affected`/inclusive-upper value IS affected — include it. Never flip inclusive and exclusive bounds.
+   c. Prose bounds: ""prior to""/""before""/""earlier than""/""preceding"" X means v < X. ""up to and including""/""through""/""versions X through Y"" means inclusive at both ends. ""versions X to Y"" without ""including"" typically means v >= X and v < Y, but read the context carefully; do not guess.
+   d. Compare versions NUMERICALLY, segment by segment. Pad the shorter version with trailing zeros so 2.0 == 2.0.0 == 2.0.0.0 and 1.5 == 1.5.0. Compare each segment as an integer: 1.10 > 1.9; 1.2.10 > 1.2.9. Never compare lexicographically. Ignore non-numeric suffixes (trailing letters, release tags like `rc1`, `p1`) only when they clearly do not affect ordering; compare the numeric segments when the format is unusual.
+   e. A version strictly above an exclusive `fixed` bound, or strictly below an inclusive `introduced` bound, is NOT affected — exclude the advisory. Do not include an advisory merely because the product is installed; the installed version must fall within the affected range.
+
+4. THOROUGHNESS: examine EVERY advisory in the supplied list, one by one. Do not skip advisories because of formatting differences (prose vs. structured), unfamiliar aliases, or version strings with unusual segment counts. For each advisory explicitly determine: (a) which product it affects (using BOTH the structured product field AND the description text), (b) whether that product appears in the system profile under ANY alias after normalization, and (c) whether the installed version falls within the affected bounds under the exact bound semantics. When in doubt about an alias, normalize and compare rather than skipping. When the installed version sits exactly on a boundary, re-check whether that boundary is inclusive or exclusive before deciding.
+
+5. Collect the CVE IDs of all advisories that pass BOTH product matching and version matching. The result array must contain unique IDs; order does not matter. If no advisories are applicable, return an empty array.
+
+Output format: return ONLY a JSON object of the form:
+{""applicable_cves"":[""CVE-..."",""CVE-...""]}
+
+with unique supplied identifiers, or an empty array:
+{""applicable_cves"":[]}"
+followups/shuffled-abstraction-plain-tier2,main,granite4.2:30b/off,z-ai/glm-5.3,2,3,1,1003,63c8bbff032fbc89b688e6e514f3d598582bc716291a3feaf347601c506f83f1,0.4648862512363996,0.6973293768545994,0.39223300970873787,0.4070891514500537,0.5894245723172629,0.31091058244462677,0.9895833333333334,0.41740088105726875,0.3490136570561457,0.42124542124542125,0.2708333333333333,0.3939393939393939,0.4006568144499179,0.3432574430823117,0.4662756598240469,8,"You are given JSON with two parts: 'system_profile' (installed software inventory: product names and versions) and 'advisories' (a list of CVE entries, each with an ID, a description, and affected-product/version information). Your job: for each advisory, decide whether it applies to at least one installed product, and output the IDs of all applicable advisories.
+
+Output ONLY a JSON object: {""applicable_cves"":[""CVE-...""]} with unique IDs copied verbatim from the supplied advisories. If none apply, output {""applicable_cves"":[]}. Do not invent, complete, or correct CVE identifiers. No markdown, no commentary.
+
+Work through EVERY advisory systematically. Keep two independent tallies: (A) advisories whose product matches nothing installed (exclude), and (B) advisories whose product matches but whose installed version must be checked against the affected range. The most common failure modes are (1) missing an applicable advisory whose installed version is older than the CVE's upper bound, and (2) wrongly including an advisory for a different product with a similar name. Guard against both.
+
+STEP 1 — PRODUCT MATCH.
+Normalize names before comparing: strip vendor prefixes (e.g. 'OpenSSL Project OpenSSL' -> 'OpenSSL'), lowercase everything, and treat underscores, hyphens, and spaces as interchangeable (e.g. 'libxml2', 'libxml_2', 'libxml 2' -> same core product; 'some_product' == 'Some Product' == 'some-product'). Package-manager style names, vendor-stripped names, and casing variants refer to the same software if the core product identity is the same. A similar-sounding but genuinely DIFFERENT product (different software, not a naming variant) does NOT match — if the core product differs, exclude the advisory immediately. If no installed entry matches any alias, exclude. If one does, go to Step 2.
+
+STEP 2 — VERSION RANGE. Read bounds direction extremely carefully; most errors come from reversing a bound.
+(a) UPPER-BOUND-ONLY ranges ('versions up to and including X', 'X and earlier', 'through X', 'affected: <= X', 'prior to X', 'before X', 'fixed in X') have NO lower bound. Every version at or below X is affected — including very old versions (1.x, 0.x, anything). If the installed version is numerically below the bound, the advisory APPLIES. Never exclude because the installed version is 'older' — older is almost always inside the range. Only 'before X'/'prior to X'/'earlier than X' are exclusive at X: exactly X is NOT affected; X itself with 'up to and including X'/'through X' IS affected.
+(b) LOWER-BOUND-ONLY ranges ('X and later', '>= X', 'from X onward') affect versions at or above X.
+(c) TWO-SIDED ranges ('from A to B', 'between A and B', 'A <= v <= B'): installed version must satisfy both bounds. A 'fixed in' version F means v < F is affected, v >= F is fixed.
+
+STEP 3 — ORDINAL COMPARISON. Compare versions segment by segment numerically, never as strings: 1.10 > 1.9; 2.0.1 > 2.0; 1.2.10 > 1.2.9. Pad differing segment counts with zeros (1.2 == 1.2.0 == 1.2.0.0; 3 == 3.0.0). Handle suffixes (1.2.3a) within the 1.2.3 family. Check boundary cases explicitly: installed == inclusive bound -> include; installed == exclusive bound -> exclude; one segment above/below a bound -> decide strictly by ordinal comparison and bound direction.
+
+STEP 4 — MULTIPLE COPIES. If the same product appears several times in system_profile (under any alias), the advisory applies if ANY copy's version is in range. Check every matching entry.
+
+FINAL RULES. Include an advisory iff (product matches under some alias) AND (some installed copy's version is inside the affected range under the exact semantics above). Exclude only when the product is genuinely not installed, or the installed version is provably outside the range (at/above a fixed version, exactly on an exclusive bound, or below a stated lower bound). Do not exclude merely because of naming style differences, inclusive-boundary equality, or a version lower than the newest mentioned version when the range has no lower bound. If the product matches and the description gives no explicit fixed/upper bound contradicting the installed version, default to including it.
+
+Before answering, re-check the two failure modes: for each candidate inclusion, confirm the product truly matches (not just similar-sounding); for each exclusion, confirm the version is provably outside the range under the stated bounds — an installed version below an upper-only bound MUST be included. Then emit the JSON object with all applicable IDs."
+followups/shuffled-abstraction-plain-tier2,main,granite4.2:30b/off,z-ai/glm-5.3,2,5,1,1005,b7e33e0e820c9a0f5185810fa59e05045f36d431421c32b1564dac49bfe17d7e,0.43675675675675674,0.599406528189911,0.39223300970873787,0.40711669283097857,0.6049766718506998,0.306782334384858,0.9739583333333334,0.4336677814938685,0.3851132686084142,0.4358974358974359,0.2596685082872928,0.4069264069264069,0.4777777777777778,0.3553113553113553,0.39515151515151514,8,"You are given JSON with two parts: `system_profile` (installed software inventory: product names, versions, metadata) and `advisories` (a list of CVE advisories, each with a CVE identifier, description, and `affected` data). Your job: identify which supplied advisories apply to the installed system and return ONLY a JSON object {""applicable_cves"":[""CVE-...""]} with unique advisory IDs copied exactly from the supplied list, or {""applicable_cves"":[]} if none apply.
+
+CRITICAL — YOUR KNOWN FAILURE MODE IS MISSING APPLICABLE ADVISORIES (recall errors). Prioritize inclusiveness: whenever product matching is plausible AND the installed version satisfies ANY affected range, INCLUDE the advisory. Exclude only when (a) the product is clearly not installed under any alias, (b) the installed version is unambiguously outside EVERY affected range, or (c) the name is superficially similar but genuinely a different product (e.g., `libjpeg` vs `libjpeg-turbo`, `openssl` vs `openssh`). Do NOT exclude merely due to stylistic name differences, long descriptions, or uncertainty. A false positive costs less than a miss: if you are genuinely unsure after careful checking, INCLUDE.
+
+1. PRODUCT MATCHING — liberal and exhaustive. Names may appear as package-manager identifiers (`libxml2`, `openssl`), repo/component names (`node`, `chromium`), or title-cased vendor names (`OpenSSL`, `Chromium`). Before comparing: lowercase; strip hyphens, underscores, dots, and spaces (treat `open_ssl`, `open-ssl`, `OpenSSL`, `open ssl` as identical); handle vendor-stripped or vendor-added prefixes (installed `libjpeg-turbo` vs advisory `libjpeg`; advisory `OpenSSL` vs installed `openssl`; installed `python3` vs advisory `python`). ALSO scan the advisory description text for alternate product names — the affected product may be named there even when the `affected` field uses a different alias. Consider EVERY installed product for EVERY advisory; do not stop at the first match attempt or the first product. When in doubt about whether two names are the same product, treat them as matching.
+
+2. VERSION MATCHING — precise, numeric, inclusive-leaning. Collect EVERY affected range from the structured `affected` data (fields: `introduced`, `fixed`, `last_affected`, `less_than`, `less_than_or_equal`, `version`, `versions`) AND from prose in the description ('versions prior to 1.2.3', 'affected 4.5.6 and later before 5.0', 'through 2.1', 'up to and including 3.0').
+   - Compare versions NUMERICALLY segment by segment, padding missing trailing segments with zero (installed 2.5 vs fixed 2.5.1 → 2.5.0 < 2.5.1 → affected; 1.10 > 1.9; installed 1.2 vs fixed 1.2.1 → vulnerable; installed 4.1.0.0 vs fixed 4.1 → EQUAL, not below). NEVER compare as strings ('10' < '9' is FALSE numerically). Segment-count mismatches are common — a 4-segment installed version vs a 3-segment bound is normal; pad and compare.
+   - Ignore non-numeric suffixes (rc, beta, u, es, -lts, distribution tags) for the numeric comparison unless they are the sole version.
+   - Semantics: `introduced` is INCLUSIVE (that version IS vulnerable). `fixed` and `less_than` are EXCLUSIVE (that version is safe). `last_affected` and `less_than_or_equal` are INCLUSIVE (that version IS vulnerable). Prose: 'before'/'prior to'/'earlier than' = exclusive; 'through'/'up to and including'/'and prior versions through' = inclusive; 'and later'/'from X'/'starting with' = inclusive lower bound.
+   - BOUNDARY RULE — most common miss: if the installed version EQUALS an inclusive bound (`introduced`, `last_affected`, `less_than_or_equal`, a 'through' bound, or the trailing segment is zero: 2.0 equals 2.0.0), it IS affected — include it. Double-check every advisory where the installed version sits exactly on a bound.
+   - BELOW-FIXED RULE — second most common miss: if the installed version is at/above `introduced` (or any lower bound, or there is no lower bound) and strictly BELOW `fixed`/`less_than`/a 'before' bound, it IS affected — include it, even when segment counts differ (installed 1.9.9 vs fixed 2.0 → affected; installed 3.4.1.5 vs fixed 3.4.2 → affected) or the installed version looks 'close' to the fix.
+   - ABOVE-LOWER-BOUND RULE: ranges with a lower bound and no upper bound ('from 3.2 and later', 'introduced: X' with no `fixed`, 'X and later versions') apply to ALL versions >= X, including much newer or much longer versions.
+   - An advisory may list multiple affected ranges and/or multiple affected products. It is applicable if the installed version falls in ANY ONE range for ANY matched product. Check EVERY range for EVERY matched product, not just the first.
+   - `version: 'all'`, `versions: ['all']`, `version: '0'`, or prose 'all versions' matches any installed version.
+
+3. APPLICABILITY. Include an advisory only when BOTH (a) a product in its affected list matches an installed product under normalization/aliasing, and (b) the installed version satisfies at least one vulnerable range for that product. Product not installed → exclude. Product installed but version outside every range → exclude. Otherwise include.
+
+4. PROCEDURE — work through EVERY supplied advisory one by one, never skipping any, including advisories late in the list. For each advisory: (1) scan ALL installed products for a name match after normalization and alias handling, including vendor-stripped forms, separator variants, and names mentioned in the description; (2) if matched, locate EVERY affected range (structured AND prose) and evaluate the installed version with correct inclusive/exclusive semantics; (3) include the advisory if any range is satisfied. Maintain a running candidate list.
+
+5. FINAL VERIFICATION PASS — before answering, re-check every advisory you tentatively excluded, specifically these high-miss cases: (a) installed version exactly at `last_affected`, `less_than_or_equal`, `introduced`, or an inclusive prose bound → INCLUDE; (b) installed version just below `fixed` → INCLUDE; (c) installed version above a bare lower bound with no upper bound → INCLUDE; (d) multi-segment versions vs shorter bounds → pad and re-compare numerically; (e) product matched via description text or vendor-stripped alias → INCLUDE; (f) multiple ranges per advisory — ensure you checked all of them, since one may apply even when others do not. ALSO re-check every advisory you passed over quickly — most misses come from advisories never carefully examined. When product names differ only in style, separators, or vendor prefix, and version fits, include.
+
+6. OUTPUT DISCIPLINE. Return ONLY the JSON object {""applicable_cves"":[...]} — no explanations, no markdown, no code fences, no extra keys or text. The entire response must be valid JSON starting with `{` and ending with `}`. Copy IDs verbatim from the supplied list with correct year and sequence digits; each ID at most once; order does not matter. If no advisory applies, return {""applicable_cves"":[]} exactly."
+followups/shuffled-abstraction-plain-tier2,main,granite4.2:30b/off,z-ai/glm-5.3,2,2,1,1002,ca303f4ce67fde2398ea28db1cebf73e3556196682733185fc207ac27db82c14,0.44173140954495005,0.5905044510385756,0.39223300970873787,0.37188208616780044,0.5101088646967341,0.2925958965209634,0.9895833333333334,0.3813953488372093,0.38368580060422963,0.4652014652014652,0.29859154929577464,0.4588744588744589,0.43018867924528303,0.33707865168539325,0.35428571428571426,8,"You are given JSON input with two parts: 'system_profile' (installed software/products and their versions) and 'advisories' (a list of CVE entries, each with an ID, description, and affected-product information such as product names, version ranges, or fixed-version bounds).
+
+Your task: determine which supplied advisories are applicable to the installed system and return ONLY their IDs.
+
+Procedure:
+
+1. PRODUCT MATCHING — MATCH FLEXIBLY ACROSS NAMING CONVENTIONS: For each advisory, decide whether the affected product is actually installed. Advisory product names may use ANY of several conventions, and you must match across all of them:
+   - Package-manager style names (e.g., 'openssl', 'libssl-dev', 'python3-requests').
+   - Human-readable names where underscores are replaced by spaces (e.g., 'some_package' vs 'some package').
+   - Hyphenated vs spaced vs underscored variants (e.g., 'net-http', 'net_http', 'net http').
+   - Title-cased, upper-cased, or lower-cased forms (e.g., 'Apache HTTP Server', 'apache_http_server', 'APACHE HTTP SERVER'). Case is NEVER a reason to treat names as different products.
+   - Repository or project-style aliases (e.g., 'google/protobuf' for 'protobuf'; 'nginx' for 'Nginx').
+   To compare: lowercase both names, strip a leading repository prefix like 'org/' or 'vendor/', replace ALL underscores and hyphens with single spaces, collapse whitespace, strip common package prefixes/suffixes ('lib', '-dev', '-devel', '-core', language ecosystem prefixes like 'python3-') when the remaining name clearly identifies the same product, then compare the normalized strings. Two names are the SAME product if a reasonable package manager or security database would treat them as aliases. When the alias relationship is genuinely ambiguous, LEAN TOWARD MATCHING — a missed real vulnerability is worse than over-matching. However, do NOT match entirely different products that merely share a short name or a substring: 'net-http' does not match 'net-ssh', and 'libxml2' does not match 'xmltooling'.
+
+2. VERSION COMPARISON — WORK SLOWLY AND EXPLICITLY: This step causes the most errors. Once the product is matched, WRITE DOWN the installed version and every bound from the advisory, then perform an explicit segment-by-segment numeric comparison before concluding anything.
+   - Normalize each version: strip 'v' prefixes, split on dots, hyphens, and underscores, convert each segment to an integer when possible.
+   - PAD the shorter version with zeros so both have equal length: '1.2' == '1.2.0' == '1.2.0.0'; '2.0' == '2.0.0'; '4.0' == '4.0.0.0'. NEVER decide based on segment count or string length.
+   - Compare NUMERICALLY, not lexicographically: '1.10' > '1.9'; '0.9.10' > '0.9.9'; '2.10' > '2.9'. For non-numeric segments, compare numeric parts first, then treat suffixes as strings (a prerelease like '1.2rc1' sorts below '1.2').
+   - A version is ABOVE a bound ONLY if some segment is strictly greater and all earlier segments are equal; BELOW ONLY if some segment is strictly smaller and all earlier segments are equal. If all padded segments are equal, the versions are EQUAL.
+   - INCLUSIVE BOUNDS MEAN EQUALITY IS AFFECTED: 'introduced', 'version_start', 'at or above X', 'X and later', 'from X', 'last_affected', 'X and earlier', 'X and below', 'through X', 'up to and including X' — if the installed version EQUALS such a bound, it IS affected. NEVER exclude a version because it merely equals an inclusive lower or upper bound.
+   - EXCLUSIVE BOUNDS: only 'fixed', 'before X', 'prior to X', 'fixed in X', or an explicitly exclusive 'version_end' makes equality NOT affected.
+   - PARTIAL RANGES ARE COMMON — handle them carefully: If the advisory gives ONLY an upper bound (e.g., 'versions prior to 4.2.1', 'fixed in 3.0.5') and NO lower bound, then EVERY version strictly below that bound is affected, including very old versions like 1.0 or 2.3 — do NOT invent a lower bound or require the installed version to be 'near' the upper bound. If the advisory gives ONLY a lower bound, every version at or above it is affected. If NO bounds are given at all, EVERY installed version of the product is affected.
+   - When the installed version has a DIFFERENT segment count than a bound, pad BOTH to the same length and re-compare before declaring 'above' or 'below'. A 3-segment installed version can easily be below a 4-segment bound and vice versa; verify numerically.
+   - When bounds appear in prose, parse the phrase exactly: 'prior to X'/'before X' (exclusive), 'X and earlier'/'through X'/'up to and including X' (inclusive), 'from X through Y' (inclusive both ends). When inclusivity is ambiguous from context, INCLUDE equality.
+
+3. SELF-CHECK BEFORE ANY EXCLUSION — MANDATORY: Before marking a matched advisory as not applicable, re-verify the version decision with padded, numeric, segment-wise comparison, writing out the comparison. Common mistakes to avoid: treating '2.0' as different from '2.0.0'; treating '1.10' as less than '1.9'; excluding a version that EQUALS an inclusive 'introduced', 'version_start', or 'last_affected' bound; excluding an old version that lies below an only-upper-bound advisory because you assumed a nonexistent lower bound; excluding a version strictly inside the interval due to a misread segment count; comparing strings character by character; failing to match a product solely because of title-casing, hyphens, underscores, or spacing differences; ignoring an advisory because its product name uses a package-manager alias ('libssl-dev' vs 'OpenSSL') or a title-cased human-readable name ('Apache HTTP Server' vs 'apache2').
+
+4. DECISION: An advisory is applicable if and only if the product is installed AND the installed version falls within the affected range respecting inclusive/exclusive semantics. Also include any advisory whose product is installed where NO version bounds restrict it. When in doubt between including and excluding, INCLUDE.
+
+5. OUTPUT: Return only a single, valid JSON object of the exact form {""applicable_cves"":[""CVE-...""]} listing the unique IDs of all applicable advisories from the supplied list, in any order. Do not invent CVE IDs not present in the supplied list. Do not omit applicable IDs — after forming your answer, re-check EVERY advisory you excluded at step 3 to confirm none was excluded due to a padding, inclusivity, alias, or partial-range error. If no advisories are applicable, return {""applicable_cves"":[]}. Output nothing else — no explanations, no markdown fences, no commentary. Your entire response must parse as JSON."

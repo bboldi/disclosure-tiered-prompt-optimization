@@ -1,0 +1,18 @@
+subprofile_id,cve_id,kind,matcher_label,corrected_label,pattern,evidence
+real_02_2,CVE-2024-6077,positives,1,0,adp_over_cna,CompactLogix 5480 ~ compactlogix_5480_firmware
+real_02_5,CVE-2024-6077,positives,1,0,adp_over_cna,CompactLogix 5480 ~ compactlogix_5480_firmware
+real_03_2,CVE-2025-12358,positives,1,0,wrong_product,Solution Builder ~ ShopEngine Elementor WooCommerce Builder Addon – All in One WooCommerce Solution
+real_05_5,CVE-2025-36521,positives,1,0,wrong_product,DICOM Viewer Pro ~ DICOM Viewer
+real_05_5,CVE-2024-28877,positives,1,0,wrong_product,DICOM Viewer Pro ~ DICOM Viewer; DICOM Viewer Pro ~ dicom_viewer
+real_05_5,CVE-2024-33606,positives,1,0,wrong_product,DICOM Viewer Pro ~ DICOM Viewer; DICOM Viewer Pro ~ dicom_viewer
+real_06_1,CVE-2026-50628,positives,1,0,wrong_product,Web Server ~ Red Hat JBoss Web Server 5
+real_06_1,CVE-2026-49875,positives,1,0,wrong_product,Web Server ~ Red Hat JBoss Web Server 5
+real_07_1,CVE-2024-0566,positives,1,0,wrong_product,Cisco Smart Software Manager On-Prem ~ Smart Manager
+real_07_1,CVE-2025-22710,positives,1,0,wrong_product,Cisco Smart Software Manager On-Prem ~ Smart Manager
+real_07_1,CVE-2024-49687,positives,1,0,wrong_product,Cisco Smart Software Manager On-Prem ~ Smart Manager
+real_07_2,CVE-2024-49687,positives,1,0,wrong_product,Cisco Smart Software Manager On-Prem ~ Smart Manager
+real_07_2,CVE-2024-0566,positives,1,0,wrong_product,Cisco Smart Software Manager On-Prem ~ Smart Manager
+real_07_2,CVE-2025-22710,positives,1,0,wrong_product,Cisco Smart Software Manager On-Prem ~ Smart Manager
+real_09_4,CVE-2025-65079,off_inventory,0,1,unsplit_list,cxlbn_firmware 230.041
+real_09_5,CVE-2025-65078,off_inventory,0,1,unsplit_list,cxlbn_firmware 230.041
+real_09_5,CVE-2025-65080,off_inventory,0,1,unsplit_list,cxlbn_firmware 230.041

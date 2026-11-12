@@ -10,6 +10,9 @@ from promptbench.live.conditions import (
     feedback_request,
     local_conditions,
     optimizer_request,
+    self_optimizer_condition,
+    shuffle_abstractions,
+    study_feedback_request,
 )
 from promptbench.storage import canonical
 
@@ -86,3 +89,62 @@ class ConditionTests(unittest.TestCase):
         self.assertTrue(body["provider"]["require_parameters"])
         self.assertEqual(body["model"], "request-model")
         self.assertNotIn("temperature", body)
+
+
+class RevisionConditionTests(unittest.TestCase):
+    """Round 1 revision: local self-optimization and the Shuffled Abstraction control."""
+
+    def test_local_optimizer_request_is_an_ollama_chat_without_tariff(self):
+        executor = {
+            "id": "fixture:1/off",
+            "provider": "ollama",
+            "model": "fixture:1",
+            "think": False,
+            "num_ctx": 16384,
+            "num_predict": 2048,
+            "timeout_seconds": 300,
+        }
+        settings = {"think": "low", "num_ctx": 32768, "num_predict": 8192, "timeout_seconds": 900}
+        optimizer = self_optimizer_condition(executor, settings)
+        self.assertEqual(optimizer["id"], "fixture:1/off/self-optimizer")
+        self.assertEqual(optimizer["model"], executor["model"])
+        condition, body = optimizer_request(optimizer, {"tier": 3}, seed=1003)
+        self.assertNotIn("reservation_usd", condition)
+        self.assertEqual(body["think"], "low")
+        self.assertEqual(body["options"], {"seed": 1003, "num_ctx": 32768, "num_predict": 8192})
+        self.assertFalse(body["truncate"])
+        self.assertEqual(body["format"]["required"], ["prompt"])
+        self.assertEqual(len(body["messages"]), 1)
+
+    def test_shuffle_keeps_count_and_field_multisets_and_is_seeded(self):
+        records = [
+            {"category": c, "version_position": v, "alias_style": a}
+            for c, v, a in [
+                ("version_excluded", "above", "repo"),
+                ("missed_applicable", "on_inclusive", None),
+                ("unrelated_product", None, "package_manager"),
+                ("version_excluded", "below", "repo"),
+            ]
+        ]
+        shuffled = shuffle_abstractions(records, 7)
+        self.assertEqual(shuffled, shuffle_abstractions(records, 7))
+        self.assertEqual(len(shuffled), len(records))
+        for key in records[0]:
+            self.assertEqual(
+                sorted(map(str, (r[key] for r in shuffled))),
+                sorted(map(str, (r[key] for r in records))),
+            )
+        self.assertNotEqual([shuffle_abstractions(records, s) for s in range(5)], [records] * 5)
+        self.assertEqual(shuffle_abstractions([], 3), [])
+
+    def test_shuffled_variant_is_refused_outside_tier_2(self):
+        profile = ConditionTests().profile()
+        profile = replace(profile, partition="optimization")
+        row = score(profile, [], "valid")
+        row["partition"] = "optimization"
+        with self.assertRaises(ValueError):
+            study_feedback_request("p", [row], [profile], tier=3, candidate=0, variant="shuffled")
+        request = study_feedback_request(
+            "p", [row], [profile], tier=2, candidate=0, variant="shuffled", shuffle_seed=5
+        )
+        self.assertEqual(request["feedback_version"], "relational-abstractions-v2-shuffled")

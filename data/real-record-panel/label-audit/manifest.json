@@ -1,0 +1,29 @@
+{
+ "adr": "docs/adr/0043-round1-revision-experiments.md (label audit)",
+ "seed": 20261030,
+ "sample_a": {
+  "applicable": 30,
+  "not_affected": 30
+ },
+ "population_a": {
+  "applicable": 2517,
+  "not_affected": 7491,
+  "distinct_cves": {
+   "applicable": 502,
+   "not_affected": 643
+  }
+ },
+ "sample_b": {
+  "positives": 18,
+  "near_misses": 18,
+  "off_inventory": 24
+ },
+ "population_b": {
+  "positives": 309,
+  "near_misses": 314,
+  "off_inventory": 433
+ },
+ "rows": 120,
+ "key_sha256": "2cd540c7b5e17df21a3892547f158ee7aaf4043f3e5655a6795b32ef9724937a",
+ "sheet_content_sha256": "c8807f3ddd9be0bb64dca35142c5f13841417f3197c9199c8a978289747baee2"
+}

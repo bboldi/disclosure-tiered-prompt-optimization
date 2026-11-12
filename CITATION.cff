@@ -20,11 +20,11 @@ doi: "10.5281/zenodo.23044381"
 license:
   - MIT
   - CC-BY-4.0
-version: "1.0.0"
-date-released: "2026-09-29"
+version: "1.1.0"
+date-released: "2026-11-12"
 preferred-citation:
   type: article
-  title: "Automatic Iterative Prompt Optimization for Local LLMs: Disclosure Tiers in CVE Applicability Matching"
+  title: "Disclosure-Constrained Prompt Optimization for Local LLMs: A Controlled Study on Synthetic CVE Applicability Rules"
   authors:
     - family-names: "Bednárik"
       given-names: "Boldizsár"

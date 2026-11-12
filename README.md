@@ -2,7 +2,7 @@
 
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.23044381.svg)](https://doi.org/10.5281/zenodo.23044381)
 
-Code and data for the paper *Automatic Iterative Prompt Optimization for Local LLMs: Disclosure Tiers in CVE Applicability Matching* by Boldizsár Bednárik, László Gogolák and József Sárosi.
+Code and data for the paper *Disclosure-Constrained Prompt Optimization for Local LLMs: A Controlled Study on Synthetic CVE Applicability Rules* by Boldizsár Bednárik, László Gogolák and József Sárosi.
 
 In the study, a hosted model improves the instructions (the prompt) of a smaller model that runs on local hardware. The local model decides which supplied CVE advisories apply to a software inventory. A **disclosure tier** controls what the hosted model may learn about the local model's mistakes:
 
@@ -17,7 +17,8 @@ Every request and response was written to an append-only journal, and every numb
 | Folder | What it holds | License |
 |---|---|---|
 | [`harness/`](harness/) | The experiment code, tests, model configuration and run instructions. | MIT |
-| [`data/`](data/) | Benchmark 07, the source-corroboration recipe, the calibration gate, the campaign and its extension, the follow-up runs, flat CSV/JSONL exports, and the paper's tables and figures. | CC BY 4.0 |
+| [`data/`](data/) | Benchmark 07, the source-corroboration recipe, the calibration gate, the campaign and its extension, the follow-up runs (including the round 1 revision runs), the Real-Record Panel with its hand labels and label audit, flat CSV/JSONL exports, and the paper's tables and figures. | CC BY 4.0 |
+| [`supplementary/`](supplementary/) | Supplementary Figs. S1–S3 and Tables S1–S2 of the revised paper. | CC BY 4.0 |
 
 Start with [`harness/README.md`](harness/README.md) for the code and [`data/README.md`](data/README.md) for the layout and record format of the data.
 
@@ -32,7 +33,9 @@ pip install -e ".[analysis]"
 python scripts/make_tables.py --data ../data --out ../tables-check
 ```
 
-The Markdown and CSV tables in `tables-check/` should match `data/tables/` exactly. Figures are visually equivalent; they are byte-identical only with the pinned plotting versions in `harness/uv.lock`.
+The Markdown and CSV tables in `tables-check/` should match `data/tables/` exactly. Figures are visually equivalent; byte identity depends on the plotting library and font versions (the versions used are pinned in `harness/uv.lock`).
+
+The analyses added in the round 1 revision (dependence-aware intervals, supplementary metrics, the local self-optimization, Shuffled Abstraction and Real-Record Panel follow-ups, the label audit) also run from `data/` alone; the commands are in section 5c of [`harness/README.md`](harness/README.md).
 
 ## Rerun the study
 
@@ -47,11 +50,13 @@ Hosted endpoints change prices and availability over time, so a rerun gives new 
 
 ## Citation
 
-> Bednárik, B., Gogolák, L., Sárosi, J. Automatic Iterative Prompt Optimization for Local LLMs: Disclosure Tiers in CVE Applicability Matching. 2026.
+> Bednárik, B., Gogolák, L., Sárosi, J. Disclosure-Constrained Prompt Optimization for Local LLMs: A Controlled Study on Synthetic CVE Applicability Rules. 2026.
 
-The code and data themselves, as cited in the paper (release v1.0.0):
+The code and data themselves, as cited in the revised paper (release v1.1.0):
 
-> Bednárik, B., Gogolák, L., Sárosi, J. Disclosure-tiered prompt optimization: code and data. Version v1.0.0. Zenodo, 2026. https://doi.org/10.5281/zenodo.23044381
+> Bednárik, B., Gogolák, L., Sárosi, J. Disclosure-tiered prompt optimization: code and data. Version v1.1.0. Zenodo, 2026.
+
+Release v1.0.0 (https://doi.org/10.5281/zenodo.23044381) is the version cited in the originally submitted paper.
 
 ## License
 

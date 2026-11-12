@@ -9,7 +9,7 @@ The companion data release (`../data/`) contains the benchmark, the source-corro
 - Linux, Python 3.13.
 - [Ollama](https://ollama.com) serving the local Executor models (the study used Ollama 0.32.13 and Q4_K_M tags; see `models.toml`). An NVIDIA GPU with 32 GB of memory ran 27B to 31B models at 1.5 to 2 seconds per call.
 - An [OpenRouter](https://openrouter.ai) API key for hosted Optimizer and reference models. Put it in `.env` as `OPENROUTER_API_KEY=...` (copy `.env.example`). The harness reads only that assignment and never writes the key to disk.
-- Optional: the pinned GEPA engine for the established-optimizer baseline, `pip install -e ".[gepa]"`; matplotlib for figures, `pip install -e ".[analysis]"`.
+- Optional: the pinned GEPA engine for the established-optimizer baseline, `pip install -e ".[gepa]"`; matplotlib, NumPy and SciPy for figures and analyses, `pip install -e ".[analysis]"`.
 
 ```sh
 python3.13 -m venv .venv && . .venv/bin/activate   # or: uv venv -p 3.13 && . .venv/bin/activate
@@ -131,6 +131,55 @@ python runs/extension-01/resume.py
 
 `--first-repetition N` runs repetitions N..`--repetitions` only. The seeded schedule generator produces the same batch schedules for lower indices, so the new repetitions are exactly the ones a longer original campaign would have run, and they pair with the original repetitions by index.
 
+### 5c. Round 1 revision follow-ups
+
+Three follow-ups were specified with their analyses before any of their runs. Before them, the naive prompt was evaluated again on the sealed panels (step 5, `ceiling prepare` with the two local Executors); `scripts/verify_pinned_stack.py` checks that every test-panel answer equals the campaign's.
+
+```sh
+# Local self-optimization: each Executor's own model as Optimizer at Tier 3
+python -m promptbench.live.study prepare --run-dir runs/self-opt-01 --phase phase3 \
+    --benchmark-dir ../data/benchmark --registry-dir runs/preflight-01 \
+    --calibration-dir runs/calibration-01 --env-file .env \
+    --optimizer self --tiers 3 --repetitions 5
+# Shuffled Abstraction and a plain Tier 2 arm on the same (new) GLM-5.3 endpoint, Granite only
+python -m promptbench.live.study prepare --run-dir runs/shuffled-01 --phase phase3 ... \
+    --only-executors granite4.2:30b/off --tiers 2 --repetitions 5 \
+    --feedback-variant shuffled --revision-arm g39-shuffled
+python -m promptbench.live.study prepare --run-dir runs/tier2-01 --phase phase3 ... \
+    --only-executors granite4.2:30b/off --tiers 2 --repetitions 5 --revision-arm g39-tier2
+# Real-Record Panel: fixed prompts on real CVE records (panel in ../data/real-record-panel)
+python -m promptbench.live.realrecord prepare --run-dir runs/real-record-01 \
+    --benchmark-dir ../data/benchmark --registry-dir runs/preflight-01 --env-file .env \
+    --panel-dir ../data/real-record-panel --data-dir ../data
+# (the hosted pass ran in its own directory with `--executors` given no value and `--max-cost-usd 10`)
+python runs/<run>/resume.py
+```
+
+The shuffled arm permutes each field of the Tier 2 relational records independently across the records of one request, with a seed derived from the request; `scripts/g39_shuffle_check.py` inverts the permutation from the stored requests. The Real-Record Panel was built by `scripts/build_real_record_panel.py` from the System Profiles and CVE records of an unpublished companion study, so it cannot be rebuilt from this release; the built panel is released. Its blind label audit was drawn by `scripts/build_label_audit.py`.
+
+The revision's analyses run on the released data alone (no model call, no key):
+
+```sh
+python scripts/revision_analyses.py --data ../data --out out/rev      # interval schemes, metrics, cost ratios, prompt features
+python scripts/tier_error_profile.py --data ../data --out out/rev     # where the Granite tiers lose
+python scripts/fig_paired_deltas.py --data ../data --intervals out/rev/g27_contrast_intervals.json --out out/rev
+python scripts/rev1_runs_analysis.py --data ../data --g33 ../data/followups/local-self-optimization \
+    --g39-shuffled ../data/followups/shuffled-abstraction \
+    --g39-tier2 ../data/followups/shuffled-abstraction-plain-tier2 --out out/rev1
+python scripts/g39_shuffle_check.py --run ../data/followups/shuffled-abstraction \
+    --plain ../data/followups/shuffled-abstraction-plain-tier2
+python scripts/g34_analysis.py --run ../data/followups/real-record-panel \
+    ../data/followups/real-record-panel-hosted --panel ../data/real-record-panel \
+    --labels ../data/real-record-panel/labels/labelling_sheet.csv --data ../data --out out/g34 \
+    [--corrections ../data/real-record-panel/label-audit/g34_label_corrections.csv]
+python scripts/label_audit_analysis.py --sheet ../data/real-record-panel/label-audit/audit_sheet.csv \
+    --key ../data/real-record-panel/label-audit/audit_key.csv \
+    --manifest ../data/real-record-panel/label-audit/manifest.json --out out/label-audit
+python scripts/verify_pinned_stack.py --run ../data/followups/naive-recheck-granite --data ../data
+```
+
+`rev1_runs_analysis.py` and `g34_analysis.py` take worker time and token counts from each run's `work-summary.jsonl`, which `export_release.py` derives from the unpublished `work/` journal.
+
 ### 6. Tables and figures
 
 ```sh
@@ -139,9 +188,9 @@ python scripts/export_release.py --out release/data --benchmark runs/benchmark-0
 python scripts/make_tables.py --data ../data --out ../data/tables
 ```
 
-`export_release.py --help` lists every argument. `--extension` releases a repetition-extension run as `campaign-extension`; `make_tables.py` then reports the paired contrasts on the original repetitions and on all repetitions, both labelled.
+`export_release.py --help` lists every argument. `--update --followup name=<run dir>` adds runs to an existing release and rebuilds the flat exports without the earlier source directories. `--extension` releases a repetition-extension run as `campaign-extension`; `make_tables.py` then reports the paired contrasts on the original repetitions and on all repetitions, both labelled.
 
-`make_tables.py` reads only the flat exports and record folders in the data release and writes every table (Markdown and CSV) and figure (PNG, plus vector PDF for the figures in the paper) of the paper. Run it on `../data/` to reproduce the published numbers exactly. The Markdown and CSV tables match byte for byte; the published figures were rendered with matplotlib 3.11.2 (pinned in `uv.lock`) and its bundled DejaVu fonts, and other versions give visually equivalent but not byte-identical images.
+`make_tables.py` reads only the flat exports and record folders in the data release and writes every table (Markdown and CSV) and figure (PNG, plus vector PDF for the figures in the paper) of the paper. Run it on `../data/` to reproduce the published numbers exactly. The Markdown and CSV tables match byte for byte. Figures are rendered with matplotlib 3.11.2 (pinned in `uv.lock`); other library or font versions give visually equivalent but not byte-identical images.
 
 ## Operations, one line each
 

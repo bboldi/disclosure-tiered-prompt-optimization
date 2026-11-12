@@ -1,6 +1,6 @@
 **Per-tier sealed-panel means across all repetitions (extension included where present), with naive and method references. Valid-answer F1 scores only parsed answers; coverage is the fraction of profiles with a parsed answer.**
 
-| Executor | Arm | Trajectories | Prompt changed | Test F1 (mean ± sample SD) | Test recall | Valid-answer F1 | Coverage | Temporal F1 | Held-out F1 |
+| Executor | Arm | Trajectories | Prompt changed | Test F1 (mean ± sample SD) | Test recall | Valid-answer F1 | Coverage | 2025-records F1 | Disjoint-product F1 |
 |---|---|---|---|---|---|---|---|---|---|
 | Granite 4.2 30B | Tier 1 | 8 | 8 | 0.395 ± 0.030 | 0.581 | 0.419 | 0.977 | 0.392 | 0.315 |
 | Granite 4.2 30B | Tier 2 | 8 | 7 | 0.362 ± 0.034 | 0.481 | 0.378 | 0.983 | 0.361 | 0.285 |

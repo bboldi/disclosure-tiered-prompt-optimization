@@ -11,7 +11,7 @@ license = "MIT"
 dependencies = []
 
 [project.optional-dependencies]
-analysis = ["matplotlib>=3.9"]
+analysis = ["matplotlib>=3.9", "numpy>=2", "scipy>=1.14"]
 gepa = ["gepa @ git+https://github.com/gepa-ai/gepa.git@15ee314f9c7d34ec153b809d401f42f55c4dcd76"]
 
 [tool.setuptools.packages.find]

@@ -22,7 +22,7 @@ from typing import Any
 NAIVE_SHA = "0080638c0f58d5b18e6db10f0327e0c85125dd7c1ea1ae311fd5ad96c05b3078"
 TIERS = (1, 2, 3)
 PANELS = ("test", "temporal", "product_heldout")
-PANEL_LABEL = {"test": "Test", "temporal": "Temporal", "product_heldout": "Product held-out"}
+PANEL_LABEL = {"test": "Test", "temporal": "2025-records", "product_heldout": "Disjoint-product"}
 EXECUTOR_LABEL = {"qwen3.8:27b/off": "Qwen 3.8 27B", "granite4.2:30b/off": "Granite 4.2 30B"}
 MARGIN = -0.02
 RESAMPLES = 2000
@@ -340,8 +340,8 @@ def table_tier_means(traj: list[dict[str, str]], panels: list[dict[str, str]], o
             "Test recall",
             "Valid-answer F1",
             "Coverage",
-            "Temporal F1",
-            "Held-out F1",
+            "2025-records F1",
+            "Disjoint-product F1",
         ],
         rows,
         "Per-tier sealed-panel means across all repetitions (extension included where present), "
@@ -398,7 +398,7 @@ def table_portability(traj: list[dict[str, str]], out: Path) -> None:
             "Mean recall",
         ],
         rows,
-        "Tier 2 optimizer portability on the sealed test panel, repetitions 1 to 3, matched budgets.",
+        "Tier 2 Optimizer portability on the sealed test panel, repetitions 1 to 3, matched budgets.",
     )
 
 
@@ -433,8 +433,8 @@ def table_ceiling(panels: list[dict[str, str]], out: Path) -> None:
             "Model",
             "Run",
             "Test F1 / recall",
-            "Temporal F1 / recall",
-            "Held-out F1 / recall",
+            "2025-records F1 / recall",
+            "Disjoint-product F1 / recall",
             "Coverage",
             "Temperature 0",
         ],
@@ -532,8 +532,8 @@ def table_trajectories(traj: list[dict[str, str]], out: Path) -> None:
             "Test F1",
             "Test recall",
             "Coverage",
-            "Temporal F1",
-            "Held-out F1",
+            "2025-records F1",
+            "Disjoint-product F1",
             "Easy/medium/hard",
         ],
         rows,
@@ -612,7 +612,7 @@ def table_budget(data: Path, traj: list[dict[str, str]], out: Path) -> None:
             panel_total,
         ],
         [
-            "Reference optimizer (DeepSeek V4 Pro, Tier 2)",
+            "Reference Optimizer (DeepSeek V4 Pro, Tier 2)",
             f"{depth} rounds × {cands} candidates × {batch} profiles",
             proposals,
             incumbents,
@@ -625,7 +625,7 @@ def table_budget(data: Path, traj: list[dict[str, str]], out: Path) -> None:
         rows.append(
             [
                 "GEPA (Tier 2)",
-                "engine-controlled; capped by executor profile calls",
+                "engine-controlled; capped by Executor profile calls",
                 "—",
                 "—",
                 str(min(gepa_calls))
@@ -654,7 +654,7 @@ def table_budget(data: Path, traj: list[dict[str, str]], out: Path) -> None:
         f"{proposals + incumbents} search evaluations per trajectory ({n_main} main trajectories "
         f"in total); a candidate slot whose proposal failed is forfeited and recorded in the "
         f"trajectory's decisions, so some trajectories spent fewer. GEPA runs report their own "
-        f"executor call counts. Selection and sealed "
+        f"Executor call counts. Selection and sealed "
         f"evaluations are shared across arms through the sealed-panel cache.",
     )
 
@@ -756,9 +756,16 @@ def table_chronology(data: Path, out: Path) -> None:
         "campaign-extension": "Repetition extension, final continuation (complete journal)",
         "followups/ceiling-opus-and-glm-reka": "Hosted reference rows: Claude Opus 5, GLM-5.3 (Reka)",
         "followups/ceiling-glm-akashml": "Hosted reference row: GLM-5.3 (AkashML) after WAF block",
-        "followups/opus-optimizer": "Claude Opus 5 as optimizer, both executors, Tier 2",
+        "followups/opus-optimizer": "Claude Opus 5 as Optimizer, both Executors, Tier 2",
         "followups/naive-local": "Local naive-prompt rows on all sealed panels",
         "followups/rule-baseline": "Input-matched deterministic rule baseline",
+        "followups/naive-recheck-granite": "Revision: naive-prompt re-check, Granite",
+        "followups/naive-recheck-qwen": "Revision: naive-prompt re-check, Qwen",
+        "followups/local-self-optimization": "Revision: local self-optimization, Tier 3",
+        "followups/shuffled-abstraction": "Revision: Shuffled Abstraction, Granite, Tier 2",
+        "followups/shuffled-abstraction-plain-tier2": "Revision: plain Tier 2 on the new endpoint",
+        "followups/real-record-panel": "Revision: Real-Record Panel, local passes",
+        "followups/real-record-panel-hosted": "Revision: Real-Record Panel, hosted pass",
     }
     for section, info in index["sections"].items():
         if section not in labels:
@@ -857,20 +864,20 @@ def figure_architecture(out: Path) -> list[str]:
     local = "#e8f0f8"
     box(2, 30, 21, 18, "Optimization", "240 profiles\n8 × 24 per run\nPaired schedules", "#f2f2f2")
     box(
-        27, 30, 21, 18, "Local executor", "Qwen or Granite\nPrompt under test\nTemperature 0", local
+        27, 30, 21, 18, "Local Executor", "Qwen or Granite\nPrompt under test\nTemperature 0", local
     )
     box(
         52, 30, 21, 18, "Evaluator", "Scores answers\nSerializes feedback\nat Tier 1, 2 or 3", local
     )
-    box(79, 30, 20, 18, "Hosted optimizer", "Main loop: GLM\n2 candidates\nper round", "#fbe9e4")
+    box(79, 30, 20, 18, "Hosted Optimizer", "Main loop: GLM\n2 candidates\nper round", "#fbe9e4")
     for x0, x1 in [(23.3, 26.7), (48.3, 51.7), (73.3, 78.7)]:
         arrow(x0, 39, x1, 39)
     ax.plot([89, 89, 37.5], [48.5, 59, 59], color=ink, linewidth=0.8)
     arrow(37.5, 59, 37.5, 48.5)
     ax.text(63, 62, "Candidate prompts: score on the same batch", ha="center", fontsize=8)
-    ax.text(87.5, 22, "Request:\nfeedback, task,\ncurrent prompt", ha="center", fontsize=8)
+    ax.text(87.5, 22, "Request:\nfeedback, task,\nincumbent prompt", ha="center", fontsize=8)
     box(27, 3, 21, 17, "Selection", "Final vs naive\n96 validation\nTies keep naive", local)
-    box(52, 3, 21, 17, "Sealed panels", "Test: 192\nTemporal: 96\nHeld-out: 96", local)
+    box(52, 3, 21, 17, "Sealed panels", "Test: 192\n2025-records: 96\nDisjoint-product: 96", local)
     arrow(37.5, 29.5, 37.5, 20.5)
     ax.text(39, 25, "After 8 rounds", fontsize=8, va="center")
     arrow(48.3, 11.5, 51.7, 11.5)
@@ -1155,7 +1162,7 @@ def more_figures(
                 s=70,
                 marker="*",
                 color="#2ca02c",
-                label="fixed scaffold",
+                label="fixed output contract",
             )
         for p in panels:
             if (
@@ -1196,7 +1203,7 @@ def more_figures(
                 markeredgecolor="black",
                 label="naive",
             ),
-            Line2D([], [], marker="*", ls="", color="#2ca02c", label="fixed scaffold"),
+            Line2D([], [], marker="*", ls="", color="#2ca02c", label="fixed output contract"),
             Line2D([], [], marker="^", ls="", color="#9467bd", label="reference"),
         ],
         fontsize=8,
@@ -1225,7 +1232,7 @@ def more_figures(
         key = f"scaffolding/{ex}/output_scaffold"
         if key in ablation:
             sv = _strata_rows(ablation[key]["rows"])
-            rows.append(("Fixed scaffold", [sv[s] for s in strata]))
+            rows.append(("Fixed output contract", [sv[s] for s in strata]))
         for p in panels:
             if (
                 p["kind"] == "ceiling"
@@ -1336,7 +1343,12 @@ def main() -> int:
     out = (args.out or data / "tables").resolve()
     out.mkdir(parents=True, exist_ok=True)
     traj = read_csv(data / "exports" / "trajectories.csv")
-    panels = read_csv(data / "exports" / "panels.csv")
+    # the revision's naive re-checks repeat naive-local answer for answer (verify_pinned_stack.py)
+    panels = [
+        p
+        for p in read_csv(data / "exports" / "panels.csv")
+        if not p["release_section"].startswith("followups/naive-recheck")
+    ]
     table_calibration(data, out)
     primary = table_primary(traj, out)
     table_tier_means(traj, panels, out)

@@ -1,0 +1,37 @@
+{
+  "source_run": "g33-self-opt-20261028T111213Z",
+  "manifest_sha256": "1f4dc5417d96a8e30b6ed89f6f8f14b811c9cb1b28f7772be484b973a2996d9f",
+  "copied": {
+    "trajectories": 10,
+    "decisions": 80,
+    "disclosures": 160,
+    "evaluations": 8136,
+    "selections": 12,
+    "sealed-panels": 15,
+    "reports": 2,
+    "hosted-key-usage": 2,
+    "candidate-failures": 29
+  },
+  "resources": {
+    "committed_results": 8296,
+    "local_attempts": 8363,
+    "hosted_attempts": 0,
+    "hosted_attempts_without_reported_cost": 0,
+    "hosted_reported_cost_usd": 0.0,
+    "running_seconds_this_directory": 27844.095
+  },
+  "excluded": [
+    "work/",
+    "checks/",
+    "telemetry/*/samples.jsonl",
+    "runtime/",
+    "sessions/",
+    "progress/",
+    "logical-keys/",
+    "operator*"
+  ],
+  "note": "follow-up run: local-self-optimization",
+  "derived": {
+    "work-summary.jsonl": 8296
+  }
+}

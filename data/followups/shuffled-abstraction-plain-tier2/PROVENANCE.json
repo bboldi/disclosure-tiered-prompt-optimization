@@ -1,0 +1,38 @@
+{
+  "source_run": "g39-tier2-20261028T151548Z",
+  "manifest_sha256": "c973b26d9942d7b4052a9fae8de9ea79beab941729a38bb886b311e22f5b2821",
+  "copied": {
+    "trajectories": 5,
+    "decisions": 40,
+    "disclosures": 80,
+    "evaluations": 5328,
+    "selections": 6,
+    "sealed-panels": 15,
+    "reports": 2,
+    "hosted-key-usage": 3,
+    "candidate-failures": 2,
+    "pauses": 1
+  },
+  "resources": {
+    "committed_results": 5408,
+    "local_attempts": 5328,
+    "hosted_attempts": 100,
+    "hosted_attempts_without_reported_cost": 3,
+    "hosted_reported_cost_usd": 0.48634,
+    "running_seconds_this_directory": 14727.132
+  },
+  "excluded": [
+    "work/",
+    "checks/",
+    "telemetry/*/samples.jsonl",
+    "runtime/",
+    "sessions/",
+    "progress/",
+    "logical-keys/",
+    "operator*"
+  ],
+  "note": "follow-up run: shuffled-abstraction-plain-tier2",
+  "derived": {
+    "work-summary.jsonl": 5408
+  }
+}

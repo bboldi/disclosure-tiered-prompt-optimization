@@ -1,0 +1,32 @@
+{
+  "source_run": "verify-naive-20261028T105512Z",
+  "manifest_sha256": "1fddc6c0b3f9102340efeabb8ad7a8df125b8be2da83be796230ac9221ef13ad",
+  "copied": {
+    "evaluations": 384,
+    "panels": 3,
+    "hosted-key-usage": 1,
+    "pauses": 1
+  },
+  "resources": {
+    "committed_results": 384,
+    "local_attempts": 384,
+    "hosted_attempts": 0,
+    "hosted_attempts_without_reported_cost": 0,
+    "hosted_reported_cost_usd": 0.0,
+    "running_seconds_this_directory": 771.726
+  },
+  "excluded": [
+    "work/",
+    "checks/",
+    "telemetry/*/samples.jsonl",
+    "runtime/",
+    "sessions/",
+    "progress/",
+    "logical-keys/",
+    "operator*"
+  ],
+  "note": "follow-up run: naive-recheck-granite",
+  "derived": {
+    "work-summary.jsonl": 384
+  }
+}

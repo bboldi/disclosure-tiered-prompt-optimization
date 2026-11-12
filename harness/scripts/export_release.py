@@ -11,6 +11,9 @@ Usage:
       --calibration <calibration dir> --campaign <final continuation dir> \
       --lineage <parent dir> [--lineage <parent dir> ...] \
       --followup name=<dir> [--followup name=<dir> ...]
+
+  # add follow-up runs to an existing release and rebuild the flat exports
+  python scripts/export_release.py --out release/data --update --followup name=<dir> ...
 """
 
 from __future__ import annotations
@@ -108,6 +111,41 @@ def resource_summary(src: Path) -> dict[str, Any]:
     }
 
 
+def work_summary(src: Path, dst: Path) -> int:
+    """Per committed work item: worker seconds, model-load seconds and token counts.
+
+    Derived from the unpublished `work/` journal so that timing and context-window audits
+    can be recomputed from the release alone. Written as `work-summary.jsonl`, one row per key.
+    """
+    rows = []
+    for result in sorted((src / "work").glob("*/result.json")):
+        done = payload(result)
+        worker = load = 0.0
+        for attempt in sorted(result.parent.glob("attempts/*")):
+            if (attempt / "worker-outcome.json").is_file():
+                worker += payload(attempt / "worker-outcome.json")["duration_ns"] / 1e9
+            if (attempt / "normalized.json").is_file():
+                usage = payload(attempt / "normalized.json").get("raw_usage") or {}
+                load += (usage.get("load_duration") or 0) / 1e9
+        final = src / done["attempt"] / "normalized.json"
+        tokens = payload(final) if final.is_file() else {}
+        rows.append(
+            {
+                "key": done["key"],
+                "attempts": sum(1 for _ in result.parent.glob("attempts/*")),
+                "worker_seconds": round(worker, 9),
+                "model_load_seconds": round(load, 9),
+                "input_tokens": tokens.get("input_tokens"),
+                "output_tokens": tokens.get("output_tokens"),
+            }
+        )
+    if rows:
+        with (dst / "work-summary.jsonl").open("w") as handle:
+            for row in sorted(rows, key=lambda r: r["key"]):
+                handle.write(json.dumps(row) + "\n")
+    return len(rows)
+
+
 def copy_records(src: Path, dst: Path, note: str) -> dict[str, Any]:
     dst.mkdir(parents=True, exist_ok=True)
     copied: dict[str, int] = {}
@@ -139,6 +177,7 @@ def copy_records(src: Path, dst: Path, note: str) -> dict[str, Any]:
             (dst / "telemetry" / s.parent.name).mkdir(parents=True, exist_ok=True)
             shutil.copy2(s, dst / "telemetry" / s.parent.name / "summary.json")
     resources = resource_summary(src)
+    derived = work_summary(src, dst)
     manifest_hash = None
     if (src / "manifest.json").is_file():
         raw = json.loads((src / "manifest.json").read_text())
@@ -160,6 +199,8 @@ def copy_records(src: Path, dst: Path, note: str) -> dict[str, Any]:
         ],
         "note": note,
     }
+    if derived:
+        provenance["derived"] = {"work-summary.jsonl": derived}
     (dst / "PROVENANCE.json").write_text(json.dumps(provenance, indent=2) + "\n")
     return provenance
 
@@ -207,6 +248,8 @@ def split_key(key: str) -> tuple[str, str, str, str, str, str]:
         executor, panel = "/".join(parts[1:-2]), parts[-2]
     elif arm in ("calibration", "scaffolding"):
         executor, stage = "/".join(parts[1:-2]), parts[-2]
+    elif arm == "real_record":  # real_record/<condition>/<prompt sha>/<profile>
+        executor, panel = "/".join(parts[1:-2]), "real_record"
     return arm, executor, tier, repetition, stage, panel
 
 
@@ -460,6 +503,8 @@ def export_panels(runs: dict[str, Path], out: Path) -> int:
             for kind, folder in (("sealed", "sealed-panels"), ("ceiling", "panels")):
                 for path in sorted((root / folder).glob("*.json")):
                     s = payload(path)
+                    if "metrics" not in s:  # real-record passes: scored by g34_analysis.py
+                        continue
                     m = s["metrics"]["failure_aware_lower_bound"]
                     writer.writerow(
                         {
@@ -495,13 +540,13 @@ def main() -> int:
         description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
     )
     parser.add_argument("--out", type=Path, required=True)
-    parser.add_argument("--benchmark", type=Path, required=True)
-    parser.add_argument("--admission", type=Path, required=True)
-    parser.add_argument("--candidates", type=Path, required=True)
-    parser.add_argument("--feeds", type=Path, required=True)
-    parser.add_argument("--cna", type=Path, required=True)
-    parser.add_argument("--calibration", type=Path, required=True)
-    parser.add_argument("--campaign", type=Path, required=True)
+    parser.add_argument("--benchmark", type=Path)
+    parser.add_argument("--admission", type=Path)
+    parser.add_argument("--candidates", type=Path)
+    parser.add_argument("--feeds", type=Path)
+    parser.add_argument("--cna", type=Path)
+    parser.add_argument("--calibration", type=Path)
+    parser.add_argument("--campaign", type=Path)
     parser.add_argument("--lineage", type=Path, action="append", default=[])
     parser.add_argument("--followup", action="append", default=[], help="name=<run dir>")
     parser.add_argument(
@@ -522,8 +567,22 @@ def main() -> int:
         default=[],
         help="name=<run dir>: earlier calibration or pilot whose summary report is kept for the calibration history",
     )
+    parser.add_argument(
+        "--update",
+        action="store_true",
+        help="keep the sections of an existing release, add --followup runs, rebuild exports",
+    )
     args = parser.parse_args()
     out = args.out.resolve()
+    sources_given = [args.benchmark, args.admission, args.candidates, args.feeds, args.cna]
+    sources_given += [args.calibration, args.campaign]
+    if args.update:
+        if any(sources_given) or args.extension or args.lineage or args.history:
+            parser.error("--update takes only --out and --followup")
+        index = json.loads((out / "INDEX.json").read_text())
+        return update(out, index, args.followup)
+    if not all(sources_given):
+        parser.error("a full export needs every source directory (or use --update)")
     out.mkdir(parents=True, exist_ok=True)
     index: dict[str, Any] = {"sections": {}}
 
@@ -607,6 +666,28 @@ def main() -> int:
                 shutil.copy2(src / rel, target / rel)
         index["sections"][f"calibration/history/{name}"] = {"source_run": src.name}
 
+    return write_exports(out, index, runs)
+
+
+def update(out: Path, index: dict[str, Any], followups: list[str]) -> int:
+    """Add follow-up runs to an existing release; every record section feeds the exports."""
+    for item in followups:
+        name, path = item.split("=", 1)
+        if (out / "followups" / name).exists():
+            raise SystemExit(f"followups/{name} already exists in the release")
+        index["sections"][f"followups/{name}"] = copy_records(
+            Path(path), out / "followups" / name, f"follow-up run: {name}"
+        )
+    runs = {
+        section: out / section
+        for section in index["sections"]
+        if section in ("calibration", "campaign", "campaign-extension")
+        or section.startswith("followups/")
+    }
+    return write_exports(out, index, runs)
+
+
+def write_exports(out: Path, index: dict[str, Any], runs: dict[str, Path]) -> int:
     # 6. Flat exports.
     exports = out / "exports"
     exports.mkdir(exist_ok=True)

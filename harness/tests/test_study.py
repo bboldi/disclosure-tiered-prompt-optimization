@@ -11,7 +11,7 @@ from promptbench.benchmark.model import BenchmarkProfile
 from promptbench.benchmark.oracle import Criterion, Installed, PublicAdvisory
 from promptbench.live.analysis import analysis, forecast
 from promptbench.live.campaign import Campaign
-from promptbench.live.conditions import NAIVE, study_feedback_request
+from promptbench.live.conditions import NAIVE, self_optimizer_condition, study_feedback_request
 from promptbench.live.execution import Execution
 from promptbench.live.reconstruct import reconstruct
 from promptbench.live.study import (
@@ -148,7 +148,18 @@ class StudyTests(unittest.TestCase):
     def worker(self, s, attempt, env_file, **kwargs):
         self.calls += 1
         request = s.get(attempt + "/request.json")
-        if request["provider"] == "ollama":
+        if request["provider"] == "ollama" and len(request["body"]["messages"]) == 1:
+            # a local Optimizer call (self-optimization): one user message, prompt schema
+            permitted = json.loads(request["body"]["messages"][0]["content"])
+            text = f"{BETTER} tier {permitted['tier']} slot {permitted['candidate_slot']}"
+            body = {
+                "model": request["body"]["model"],
+                "done": True,
+                "done_reason": "stop",
+                "message": {"content": json.dumps({"prompt": text})},
+                "eval_count": 5,
+            }
+        elif request["provider"] == "ollama":
             prompt = request["body"]["messages"][0]["content"]
             profile_text = json.loads(request["body"]["messages"][1]["content"])["system_profile"]
             truth = [self.advisory.id] if profile_text == "version 1" else []
@@ -592,6 +603,60 @@ class StudyTests(unittest.TestCase):
             self.assertEqual(ext["schedules"][rep], full["schedules"][rep])
         with self.assertRaises(IntegrityError):
             build_manifest(design(repetitions=8, first_repetition=9), self.profiles, cond)
+
+    def test_self_optimization_uses_the_executor_model_locally_and_no_hosted_call(self):
+        cond = conditions()
+        settings = {"think": "low", "num_ctx": 32768, "num_predict": 8192, "timeout_seconds": 900}
+        cond["local"] += [self_optimizer_condition(c, settings) for c in cond["local"]]
+        with self.assertRaises(IntegrityError):  # an executor without its Optimizer condition
+            build_manifest(
+                design(optimizer="self", tiers=[3], reference=None),
+                self.profiles,
+                conditions(),
+            )
+        store = Store(self.root / "self")
+        store.put("plan.json", {"kind": "main_study", "phase": "repilot", "max_seconds": 3600})
+        store.put("inputs/profiles.json", [p.record() for p in self.profiles])
+        store.put("inputs/advisories.json", {self.advisory.id: self.advisory.record()})
+        store.put("inputs/conditions.json", cond)
+        store.put("inputs/study_conditions.json", cond)
+        manifest = build_manifest(
+            design(optimizer="self", tiers=[3], repetitions=1, reference=None),
+            self.profiles,
+            cond,
+        )
+        self.assertTrue(manifest["hosted_seed_supported"])
+        store.put("manifest.json", manifest)
+        self.run_study(store)
+        requests = [store.get(n) for n in store.names("disclosures/*.json")]
+        self.assertTrue(requests)
+        for disclosure in requests:
+            body = disclosure["request"]
+            self.assertEqual(body["think"], "low")
+            self.assertEqual(body["options"]["num_ctx"], 32768)
+            self.assertEqual(body["options"]["seed"], 1001)  # hosted_seed_base + repetition
+            self.assertNotIn("provider", body)  # no OpenRouter routing block
+        reports = [store.get(n) for n in store.names("trajectories/*.json")]
+        self.assertEqual(
+            {r["optimizer"] for r in reports},
+            {"family0/off/self-optimizer", "family1/off/self-optimizer"},
+        )
+        self.assertFalse(store.names("generation-pending/*.json"))
+
+    def test_shuffled_variant_runs_at_tier_2_only_and_keeps_field_multisets(self):
+        with self.assertRaises(IntegrityError):
+            build_manifest(
+                design(feedback_variant="shuffled", tiers=[1, 2]), self.profiles, conditions()
+            )
+        store = self.prepared_store(
+            feedback_variant="shuffled", tiers=[2], repetitions=1, reference=None
+        )
+        self.run_study(store)
+        for name in store.names("disclosures/*.json"):
+            permitted = json.loads(store.get(name)["request"]["messages"][0]["content"])
+            self.assertEqual(permitted["feedback_version"], "relational-abstractions-v2-shuffled")
+        reports = [store.get(n) for n in store.names("trajectories/*.json")]
+        self.assertEqual({r["feedback_variant"] for r in reports}, {"shuffled"})
 
     def test_forecast_reports_measured_timings_and_fit(self):
         store = self.prepared_store(repetitions=1, tiers=[2], reference=None)
